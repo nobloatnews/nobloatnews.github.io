@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<rss version="2.0">
+<channel>
+  <title>My Old Web 1.0 Site</title>
+  <link>https://example.com/</link>
+  <description>Handcrafted HTML and thoughts.</description>
+  <language>en-us</language>
+
+  <item>
+    <title>Another Post</title>
+    <link>https://example.com/posts/2025-02-another.html</link>
+    <pubDate>Tue, 18 Feb 2025 00:00:00 +0000</pubDate>
+    <description>My second post — no JavaScript, just vibes.</description>
+  </item>
+
+  <item>
+    <title>Hello World</title>
+    <link>https://example.com/posts/2025-01-hello.html</link>
+    <pubDate>Wed, 1 Jan 2025 00:00:00 +0000</pubDate>
+    <description>My first post on my old-school site.</description>
+  </item>
+
+</channel>
+</rss>
+
