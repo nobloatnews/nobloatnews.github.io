@@ -1,23 +1,30 @@
 <?xml version="1.0" encoding="UTF-8" ?>
 <rss version="2.0">
 <channel>
-  <title>My Old Web 1.0 Site</title>
-  <link>https://example.com/</link>
-  <description>Handcrafted HTML and thoughts.</description>
-  <language>en-us</language>
+  <title>NoBloatNews</title>
+  <link>https://nobloatnews.github.io/</link>
+  <description>HTML a mano y comida.</description>
+  <language>es-ar</language>
 
   <item>
-    <title>Another Post</title>
-    <link>https://example.com/posts/2025-02-another.html</link>
-    <pubDate>Tue, 18 Feb 2025 00:00:00 +0000</pubDate>
-    <description>My second post — no JavaScript, just vibes.</description>
+    <title>Pan de Queso</title>
+    <link>https://nobloatnews.github.io/posts/2025-10-pan_de_queso.html</link>
+    <pubDate>Sun, 26 Oct 2025 00:00:00 +0000</pubDate>
+    <description>Pan de Queso.</description>
   </item>
 
   <item>
-    <title>Hello World</title>
-    <link>https://example.com/posts/2025-01-hello.html</link>
-    <pubDate>Wed, 1 Jan 2025 00:00:00 +0000</pubDate>
-    <description>My first post on my old-school site.</description>
+    <title>Cocinando milanesa de pescado frito</title>
+    <link>https://nobloatnews.github.io/posts/2025-10-milanesa_pescado.html</link>
+    <pubDate>Sat, 25 Oct 2025 00:00:00 +0000</pubDate>
+    <description>Fotos: Cocinando milanesa de pescado frito</description>
+  </item>
+
+  <item>
+    <title>Hola Mundo</title>
+    <link>https://nobloatnews.github.io/posts/2025-01-hola.html</link>
+    <pubDate>Sat, 25 Oct 2025 00:00:00 +0000</pubDate>
+    <description>Mi primera publicación.</description>
   </item>
 
 </channel>
