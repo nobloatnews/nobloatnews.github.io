@@ -1,15 +1,17 @@
 #!/bin/sh
-if [ $# -eq 0 ]
+if [ $# -lt 2 ]
   then
-    echo "Poné el mensaje del commit como primer argumento"
+    echo "Uso: $0 <nombre-archivo> \"<titulo con espacios>\""
     exit;
 fi
 
 year=$(date +%Y)
 month=$(date +%m)
+name_month=$(date +%B)
 day=$(date +%d)
 
 
-cp posts/2025-10-marinera_pescado.html posts/$year-$month-$day-$1.html
+cp posts/2025-10-hola.html posts/$year-$month-$day-$1.html
+sed -i "/<ul>/a\        <li><a href=\"posts/$year-$month-$day-$1.html\">$2</a> – $day $name_month $year</li>" index.html
 echo "Publicación creada"
-ls -ltr posts/ | tail -5
+ls -ltr posts/ | tail -1
