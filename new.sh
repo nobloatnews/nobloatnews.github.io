@@ -13,5 +13,4 @@ day=$(date +%d)
 
 cp posts/2025-10-hola.html posts/$year-$month-$day-$1.html
 sed -i "/<ul>/a\        <li><a href=\"posts/$year-$month-$day-$1.html\">$2</a> – $day $name_month $year</li>" index.html
-echo "Publicación creada"
-ls -ltr posts/ | tail -1
+vim "posts/$year-$month-$day-$1.html"
