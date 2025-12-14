@@ -1,7 +1,7 @@
 #!/bin/sh
 if [ $# -lt 2 ]
   then
-	  echo "Uso: $0 <nombre-archivo> \"<titulo con espacios>\" <ruta del directorio de imagenes(opcional)> <tag_name_archive(opcional)> audio \"texto_entero para generar audio\""
+	  echo "Uso: $0 <nombre-archivo> \"<titulo con espacios>\" <ruta del directorio de imagenes (opcional)> <ruta entera del directorio de audio(opcional)>  \"texto_entero para generar audio(opcional)\""
     exit;
 fi
 
@@ -11,9 +11,11 @@ name_month=$(date +%B)
 day=$(date +%d)
 
 
-# 1. Arreglar el script si el audio dura menos que las imágenes porque genera valor negativo (el audio debe durar lo mismo que el video). NO. Esto se soluciona cambiando el totseconds.
-# 2. Subir video automáticamente el audio a YouTube y a Archive.
-#
+tag_name="$year-$month-$day-$1"
+
+# 1. Arreglar el script si el audio dura menos que las imágenes porque genera valor negativo (el audio debe durar lo mismo que el video) ----->> NO. Esto se soluciona cambiando el totseconds.
+# El slidier requiere ese ligero cambio sino te genera valores negativos.
+# 2. Subir video automáticamente el audio a YouTube y a Archive. No se puede subir audios a youtube tendras que concatenarlos con una imágen.
 # ia upload $year-$month-$dayaudio file.m4a
 # youtube-upload ...
 # 3. Crear un artículo automáticamente basado en imágenes.
@@ -43,12 +45,42 @@ day=$(date +%d)
 
 
 
-cp posts/2025-10-hola.html posts/$year-$month-$day-$1.html
-sed -i "/<ul>/a\        <li><a href=\"posts/$year-$month-$day-$1.html\">$2</a> – $day $name_month $year</li>" index.html
+cp posts/2025-10-hola.html posts/$tag_name.html
+sed -i "/<ul>/a\        <li><a href=\"posts/$tag_name.html\">$2</a> – $day $name_month $year</li>" index.html
 #ls -1 $3 | sed -e "s|^|<img src=\"https://archive.org/download/tag_name/|" | sed -e "s|$|_thumb.jpg\">|" | tee -a "posts/$year-$month-$day-$1.html"
 
-### Carga imagenes de archive.
-for i in $(ls -1 $3/*.jpg); do echo "<a href=\"https://archive.org/download/$4/$i\"><img src=\"https://archive.org/download/$4/${i%.*}_thumb.jpg\"></a>" >> "posts/$year-$month-$day-$1.html" ; done
+
+## Si pusiste texto como audio 
+(($# == 5)) && echo "Generando archivo de audio a partir del texto..." && echo $5 | espeak-ng -v es -w "/tmp/$tag_name.wav"
+
+#### GENERAMOS EL VIDEO, si el audio es mas largo que las imagenes tendras que cambiarlo.
+#longitud_audio=$(ffprobe -v error -show_entries format=duration -of default=noprint_wrappers=1:nokey=1 $4)
+#cantidad_imagenes=$((ls -1 $3 | wc -l))
+
+(($# == 5)) && ls $3/*.jpg | sort | gen.sh > "/tmp/$tag_name" && slider -i "/tmp/$tag_name" -a "/tmp/$tag_name.wav" -o "/tmp/$tag_name.mp4"
+
+# Si es igual a 4 el video debería ser sin el audio-texto pero con el audio.
+(($# == 4)) && ls $3/*.jpg | sort | gen.sh > "/tmp/$tag_name" && slider -i "/tmp/$tag_name" -a "$4" -o "/tmp/$tag_name.mp4"
+
+# Si es igual a 3 el video debería ser solo imagenes sin audios.
+(($# == 3)) && ls $3/*.jpg | sort | gen.sh > "/tmp/$tag_name" && slider -i "/tmp/$tag_name" -o "/tmp/$tag_name.mp4"
+
+
+#### SUBIMOS EL AUDIO.
+# Subimos el audio a Archive.
+(($# > 3)) && source $HOME/internetarchive/bin/activate && cd $4 && ia upload "$year-$month-$day-$1audio" $4 
+
+
+# Subimos el audio a YouTube.
+# OJO: No se puede subir audio a YouTube tendras que concatenarlo con una imagen.
+(($# > 3)) && echo "Generamos thumbnail para youtube" && thumbnailg "$2" "/tmp/$tag_name.png" && echo "Creando un video a partir del audio..." && ffmpeg -i "/tmp/$tag_name.png" -i $4 -c:v libx264 -tune stillimage -c:a copy /tmp/$tag_name.mp4 && source $HOME/youtube-upload/bin/activate && $HOME/youtube-upload/youtube-upload/bin/youtube-upload --title="$tag_name" --privacy="unlisted" --embeddable=True "/tmp/$tag_name.mp4"
+
+echo "Luego podes descargar los subtitulos de YouTube pasarlo a ChatGPT y generar un archivo audio con eso."
+
+
+
+### Carga imagenes de archive en el html.
+(($# > 2)) && for i in $(ls -1 $3/*.jpg); do echo "<a href=\"https://archive.org/download/$4/$i\"><img src=\"https://archive.org/download/$4/${i%.*}_thumb.jpg\"></a>" >> "posts/$year-$month-$day-$1.html" ; done
 
 
 
