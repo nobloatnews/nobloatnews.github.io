@@ -6,6 +6,9 @@ for cmd in ffmpeg ffprobe yt-dlp espeak-ng slider gen.sh; do
   command -v "$cmd" >/dev/null || { echo "Falta $cmd"; exit 1; }
 done
 
+# Si pusiste texto no subas el archivo de audio
+
+
 actual_dir=$PWD;
 
 if [ $# -lt 2 ];
@@ -117,18 +120,20 @@ echo "Listo."
 
 cd $actual_dir;
 
-(($# > 2)) && echo "Subimos video a Archive.org" && source $HOME/internetarchive/bin/activate && ia upload "$tag_name-video" "/tmp/$tag_name.mp4" && echo "Cargo video de Archive en el html generado (video tag)." && echo "<h3><a href=\"https://archive.org/download/$tag_name-video/$tag_name.mp4\">¡¡CLICK PARA VER VIDEO DE LAS FOTOS EN ARCHIVE (con explicación de chatgpt)!!</a></h3>" >> "posts/$tag_name.html"; 
-
 (($# > 2)) && echo "Subimos video a YouTube" && source $HOME/youtube-upload/bin/activate && youtube_id=$($HOME/youtube-upload/youtube-upload/bin/youtube-upload --title="$tag_name" --privacy="unlisted" --embeddable=True "/tmp/$tag_name.mp4" | tail -1) && echo "Cargo video de YouTube en el html generado (iframe tag)." && echo "<h3><a href=\"https://www.youtube.com/embed/$youtube_id\">¡¡CLICK PARA VER VIDEO DE LAS FOTOS EN YOUTUBE (con explicación de chatgpt)!!</a></h3>" >> "posts/$tag_name.html"
 
-(($# == 4)) && echo "Subimos el audio a Archive." && source $HOME/internetarchive/bin/activate && ia upload "$year-$month-$day-$1audio" $4 && echo "<h3><a href=\"https://archive.org/download/$year-$month-$day-$1audio/$4\">¡¡¡Escuchar el Audio del suceso!!!.</a></h3>" >> "posts/$tag_name.html" ; 
+(($# > 2)) && echo "Subimos video a Archive.org" && source $HOME/internetarchive/bin/activate && ia upload "$tag_name-video" "/tmp/$tag_name.mp4" && echo "Cargo video de Archive en el html generado (video tag)." && echo "<h3><a href=\"https://archive.org/download/$tag_name-video/$tag_name.mp4\">¡¡CLICK PARA VER VIDEO DE LAS FOTOS EN ARCHIVE (con explicación de chatgpt)!!</a></h3>" >> "posts/$tag_name.html"; 
+
+
+# Si pusiste texto como audio no subimos el pseudoaudio
+(($# == 4)) && (($# != 5)) && echo "Subimos el audio a Archive." && source $HOME/internetarchive/bin/activate && ia upload "$year-$month-$day-$1audio" $4 && echo "<h3><a href=\"https://archive.org/download/$year-$month-$day-$1audio/$4\">¡¡¡Escuchar el Audio del suceso!!!.</a></h3>" >> "posts/$tag_name.html" ; 
 
 
 echo "OJO: No se puede subir audio a YouTube tendras que concatenarlo con una imagen."
 
-# (($# > 3)) && (($# != 5)) && echo "Subimos el audio a YouTube." && echo "Generamos thumbnail para youtube" && thumbnailg "$2" "/tmp/$tag_name.png" && echo "Creando un video a partir del audio..." && ffmpeg -i "/tmp/$tag_name.png" -i $4 -c:v libx264 -tune stillimage -c:a copy /tmp/$tag_name.mp4 && source $HOME/youtube-upload/bin/activate && youtube_id=$($HOME/youtube-upload/youtube-upload/bin/youtube-upload --title="$tag_name" --privacy="unlisted" --embeddable=True "/tmp/$tag_name.mp4" | tail -1) && echo "Cargo video del audio de YOUTUBE en el html generado (a tag)." && echo "<h3><a href="\"https://www.youtube.com/embed/$youtube_id">¡¡CLICK PARA ESCUCHAR EL AUDIO EN YOUTUBE!!</a></h3>" >> "posts/$tag_name.html"
+(($# == 4)) && (($# != 5)) && echo "Subimos el audio a YouTube." && echo "Generamos thumbnail para youtube" && thumbnailg "$2" "/tmp/$tag_name.png" && echo "Creando un video a partir del audio..." && ffmpeg -i "/tmp/$tag_name.png" -i $4 -c:v libx264 -tune stillimage -c:a copy /tmp/$tag_name.mp4 && source $HOME/youtube-upload/bin/activate && youtube_id=$($HOME/youtube-upload/youtube-upload/bin/youtube-upload --title="$tag_name" --privacy="unlisted" --embeddable=True "/tmp/$tag_name.mp4" | tail -1) && echo "Cargo video del audio de YOUTUBE en el html generado (a tag)." && echo "<h3><a href="\"https://www.youtube.com/embed/$youtube_id">¡¡CLICK PARA ESCUCHAR EL AUDIO EN YOUTUBE!!</a></h3>" >> "posts/$tag_name.html"
 
-(($# > 3)) && echo "Subimos el audio a YouTube." && echo "Generamos thumbnail para youtube" && thumbnailg "$2" "/tmp/$tag_name.png" && echo "Creando un video a partir del audio..." && ffmpeg -i "/tmp/$tag_name.png" -i $4 -c:v libx264 -tune stillimage -c:a copy /tmp/audio$tag_name.mp4 && source $HOME/youtube-upload/bin/activate && youtube_id=$($HOME/youtube-upload/youtube-upload/bin/youtube-upload --title="$tag_name" --privacy="unlisted" --embeddable=True "/tmp/audio$tag_name.mp4" | tail -1) && echo "Cargo video del audio de YOUTUBE en el html generado (a tag)." && echo "<h3><a href=\"https://www.youtube.com/embed/$youtube_id\">¡¡CLICK PARA ESCUCHAR EL AUDIO EN YOUTUBE!!</a></h3>" >> "posts/$tag_name.html"
+#(($# > 3)) && echo "Subimos el audio a YouTube." && echo "Generamos thumbnail para youtube" && thumbnailg "$2" "/tmp/$tag_name.png" && echo "Creando un video a partir del audio..." && ffmpeg -i "/tmp/$tag_name.png" -i $4 -c:v libx264 -tune stillimage -c:a copy /tmp/audio$tag_name.mp4 && source $HOME/youtube-upload/bin/activate && youtube_id=$($HOME/youtube-upload/youtube-upload/bin/youtube-upload --title="$tag_name" --privacy="unlisted" --embeddable=True "/tmp/audio$tag_name.mp4" | tail -1) && echo "Cargo video del audio de YOUTUBE en el html generado (a tag)." && echo "<h3><a href=\"https://www.youtube.com/embed/$youtube_id\">¡¡CLICK PARA ESCUCHAR EL AUDIO EN YOUTUBE!!</a></h3>" >> "posts/$tag_name.html"
 
 
 echo "Cargo imagenes de archive en el html generado."
@@ -138,8 +143,14 @@ echo "<hr>" >> "posts/$tag_name.html"
 (($# > 2)) && cd $3 && source $HOME/internetarchive/bin/activate && ia upload "$tag_name-images" *
 
 cd $actual_dir;
+cantidad_imagenes=$(ls -1 $3 | wc -l)
+
+(($# > 2)) && ((cantidad_imagenes >= 10)) && echo "<h3><a href=\"https://archive.org/download/$tag_name-images/$i\">¡¡¡VER LAS $cantidad_imagenes DE FOTOS EN ARCHIVE!!!!</a></h3>" >> "$actual_dir/posts/$tag_name.html" ; 
+
 
 (($# > 2)) && cd $3 && for i in *.jpg; do echo "<a href=\"https://archive.org/download/$tag_name-images/$i\"><img src=\"https://archive.org/download/$tag_name-images/${i%.*}_thumb.jpg\"></a>" >> "$actual_dir/posts/$tag_name.html" ; done
+
+
 
 cd $actual_dir;
 
@@ -155,4 +166,4 @@ echo "</body>" >> "posts/$tag_name.html"
 echo "</html>" >> "posts/$tag_name.html"
 
 
-vim "posts/$year-$month-$day-$1.html"
+git add . && git commit -m "posts/$year-$month-$day-$1.html" && git push
