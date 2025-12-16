@@ -123,18 +123,18 @@ echo "Listo."
 
 cd $actual_dir;
 
-(($# > 2)) && echo "Subimos video a YouTube" && source $HOME/youtube-upload/bin/activate && youtube_id=$($HOME/youtube-upload/youtube-upload/bin/youtube-upload --title="$2" --privacy="public" --embeddable=True "/tmp/$tag_name.mp4" | tail -1) && echo "Cargo video de YouTube en el html generado (iframe tag)." && echo "<h3><a href=\"https://www.youtube.com/embed/$youtube_id\">¡¡CLICK PARA VER VIDEO DE LAS FOTOS EN YOUTUBE (con explicación de chatgpt)!!</a></h3>" >> "posts/$tag_name.html"
+(($# > 2)) && echo "Subimos video a YouTube" && source $HOME/youtube-upload/bin/activate && youtube_id=$($HOME/youtube-upload/youtube-upload/bin/youtube-upload --title="$2" --privacy="unlisted" --embeddable=True "/tmp/$tag_name.mp4" | tail -1) && echo "Cargo video de YouTube en el html generado (iframe tag)." && echo "<h3><a href=\"https://www.youtube.com/embed/$youtube_id\">¡¡CLICK PARA VER VIDEO DE LAS FOTOS EN YOUTUBE (con explicación de chatgpt)!!</a></h3>" >> "posts/$tag_name.html"
 
 (($# > 2)) && echo "Subimos video a Archive.org" && source $HOME/internetarchive/bin/activate && ia upload "$tag_name-video" "/tmp/$tag_name.mp4" && echo "Cargo video de Archive en el html generado (video tag)." && echo "<h3><a href=\"https://archive.org/download/$tag_name-video/$tag_name.mp4\">¡¡CLICK PARA VER VIDEO DE LAS FOTOS EN ARCHIVE (con explicación de chatgpt)!!</a></h3>" >> "posts/$tag_name.html"; 
 
 
 # Si pusiste el 5to argumento como 1 entonces subimos el pseudoaudio
-(($# == 4)) && (($5 == 1)) && echo "Subimos el audio a Archive." && source $HOME/internetarchive/bin/activate && ia upload "$year-$month-$day-$1audio" $4 && echo "<h3><a href=\"https://archive.org/download/$year-$month-$day-$1audio/$4\">¡¡¡Escuchar el Audio del suceso!!!.</a></h3>" >> "posts/$tag_name.html" ; 
+(($# == 5)) && (($5 == 1)) && echo "Subimos el audio a Archive." && source $HOME/internetarchive/bin/activate && ia upload "$year-$month-$day-$1audio" $4 && echo "<h3><a href=\"https://archive.org/download/$year-$month-$day-$1audio/$4\">¡¡¡Escuchar el Audio del suceso!!!.</a></h3>" >> "posts/$tag_name.html" ; 
 
 
 echo "OJO: No se puede subir audio a YouTube lo concatenaré con una imagen."
 
-(($# == 4)) && (($5 == 1)) && echo "Subimos el audio a YouTube." && echo "Generamos thumbnail para youtube" && thumbnailg "$2" "/tmp/$tag_name.png" && echo "Creando un video a partir del audio..." && ffmpeg -i "/tmp/$tag_name.png" -i $4 -c:v libx264 -tune stillimage -c:a copy /tmp/$tag_name.mp4 && source $HOME/youtube-upload/bin/activate && youtube_id=$($HOME/youtube-upload/youtube-upload/bin/youtube-upload --title="$2" --privacy="public" --embeddable=True "/tmp/$tag_name.mp4" | tail -1) && echo "Cargo video del audio de YOUTUBE en el html generado (a tag)." && echo "<h3><a href="\"https://www.youtube.com/embed/$youtube_id">¡¡CLICK PARA ESCUCHAR EL AUDIO EN YOUTUBE!!</a></h3>" >> "posts/$tag_name.html"
+(($# == 5)) && (($5 == 1)) && echo "Subimos el audio a YouTube." && echo "Generamos thumbnail para youtube" && thumbnailg "$2" "/tmp/$tag_name.png" && echo "Creando un video a partir del audio..." && ffmpeg -i "/tmp/$tag_name.png" -i $4 -c:v libx264 -tune stillimage -c:a copy /tmp/$tag_name.mp4 && source $HOME/youtube-upload/bin/activate && youtube_id=$($HOME/youtube-upload/youtube-upload/bin/youtube-upload --title="$2" --privacy="unlisted" --embeddable=True "/tmp/$tag_name.mp4" | tail -1) && echo "Cargo video del audio de YOUTUBE en el html generado (a tag)." && echo "<h3><a href="\"https://www.youtube.com/embed/$youtube_id">¡¡CLICK PARA ESCUCHAR EL AUDIO EN YOUTUBE!!</a></h3>" >> "posts/$tag_name.html"
 
 
 echo "Cargo imagenes de archive en el html generado."
