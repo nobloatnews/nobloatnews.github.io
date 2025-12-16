@@ -1,9 +1,10 @@
 #!/bin/bash
 set -euo pipefail
 
+echo "se necesita el comando ia (internet archive)".
+
 for cmd in ffmpeg ffprobe yt-dlp espeak-ng slider gen.sh; do
   # ia (internet archive) debe estar dentro de venv python
-  echo "se necesita el comando ia (internet archive)".
   command -v "$cmd" >/dev/null || { echo "Falta $cmd"; exit 1; }
 done
 
@@ -19,8 +20,8 @@ if [ $# -lt 2 ];
           echo "Con los siguientes comandos:"
           echo "yt-dlp --ignore-config --write-subs --write-auto-sub --sub-lang es --sub-format \"srt\" --skip-download https://www.youtube.com/watch?v=VIDEO_ID"
           echo "sed -E '/^[0-9]+$|^$/d; /^[0-9]{2}:/d' video.en.srt > subtitles.txt"
-	  echo "Uso: $0 <nombre-archivo> \"<titulo con espacios>\" <ruta del directorio de imagenes (opcional)> <ruta entera del directorio de audio.m4a(opcional)>  \"texto_entero para generar audio(opcional)\""
-	  echo "Si pones el texto, va a ignorar el archivo de audio."
+	  echo "Uso: $0 <nombre-archivo> \"<titulo con espacios>\" <ruta del directorio de imagenes (opcional)> <ruta entera del directorio de audio.m4a(opcional)> \"subir_audio(opcional): si pones 1 sube el audio\" \"texto entero para generar audio(opcional)\" "
+	  echo "Si pones el texto al final, el video se creará con espeak generado con el texto y va a ignorar el archivo de audio."
     exit;
 fi
 
@@ -97,8 +98,8 @@ sed -i "/<ul>/a\        <li><a href=\"posts/$tag_name.html\">$2</a> – $day $na
 #ls -1 $3 | sed -e "s|^|<img src=\"https://archive.org/download/tag_name/|" | sed -e "s|$|_thumb.jpg\">|" | tee -a "posts/$year-$month-$day-$1.html"
 
 
-## Si pusiste texto como audio. Si queres que el archivo de audio sea por defecto no uses el 5to parametro.
-(($# == 5)) && echo "Generando archivo de audio a partir del texto..." && echo "$5" | espeak-ng -v es -w "/tmp/$tag_name.wav"
+## Si pusiste texto como audio. Si queres que el archivo de audio sea por defecto no uses el 6to parametro.
+(($# == 6)) && echo "Generando archivo de audio a partir del texto..." && echo "$6" | espeak-ng -v es -w "/tmp/$tag_name.wav"
 
 echo "Listo."
 
@@ -108,10 +109,11 @@ echo "Listo."
 
 echo "Generando video..."
 
-# Si es igual a 5 el video será con el audio-texto generado por espeak.
-(($# == 5)) && ls $3/*.jpg | sort | gen.sh > "/tmp/$tag_name" && cd /tmp && slider -i "$tag_name" -a "$tag_name.wav" -o "/tmp/$tag_name.mp4"
+# Si es igual a 6 el video será con el audio-texto generado por espeak.
+(($# == 6)) && ls $3/*.jpg | sort | gen.sh > "/tmp/$tag_name" && cd /tmp && slider -i "$tag_name" -a "$tag_name.wav" -o "/tmp/$tag_name.mp4"
 
-# Si es igual a 4 el video debería ser sin el audio-texto generado por espeak pero con el archivo de audio.
+# Si es igual a 5 o 4 el video debería ser sin el audio-texto generado por espeak pero con el archivo de audio.
+(($# == 5)) && ls $3/*.jpg | sort | gen.sh > "/tmp/$tag_name" && cd /tmp && slider -i "$tag_name" -a "$4" -o "/tmp/$tag_name.mp4"
 (($# == 4)) && ls $3/*.jpg | sort | gen.sh > "/tmp/$tag_name" && cd /tmp && slider -i "$tag_name" -a "$4" -o "/tmp/$tag_name.mp4"
 
 # Si es igual a 3 el video debería ser solo imagenes sin audios.
@@ -126,15 +128,13 @@ cd $actual_dir;
 (($# > 2)) && echo "Subimos video a Archive.org" && source $HOME/internetarchive/bin/activate && ia upload "$tag_name-video" "/tmp/$tag_name.mp4" && echo "Cargo video de Archive en el html generado (video tag)." && echo "<h3><a href=\"https://archive.org/download/$tag_name-video/$tag_name.mp4\">¡¡CLICK PARA VER VIDEO DE LAS FOTOS EN ARCHIVE (con explicación de chatgpt)!!</a></h3>" >> "posts/$tag_name.html"; 
 
 
-# Si pusiste texto como audio no subimos el pseudoaudio
-(($# == 4)) && (($# != 5)) && echo "Subimos el audio a Archive." && source $HOME/internetarchive/bin/activate && ia upload "$year-$month-$day-$1audio" $4 && echo "<h3><a href=\"https://archive.org/download/$year-$month-$day-$1audio/$4\">¡¡¡Escuchar el Audio del suceso!!!.</a></h3>" >> "posts/$tag_name.html" ; 
+# Si pusiste el 5to argumento como 1 entonces subimos el pseudoaudio
+(($# == 4)) && (($5 == 1)) && echo "Subimos el audio a Archive." && source $HOME/internetarchive/bin/activate && ia upload "$year-$month-$day-$1audio" $4 && echo "<h3><a href=\"https://archive.org/download/$year-$month-$day-$1audio/$4\">¡¡¡Escuchar el Audio del suceso!!!.</a></h3>" >> "posts/$tag_name.html" ; 
 
 
-echo "OJO: No se puede subir audio a YouTube tendras que concatenarlo con una imagen."
+echo "OJO: No se puede subir audio a YouTube lo concatenaré con una imagen."
 
-(($# == 4)) && (($# != 5)) && echo "Subimos el audio a YouTube." && echo "Generamos thumbnail para youtube" && thumbnailg "$2" "/tmp/$tag_name.png" && echo "Creando un video a partir del audio..." && ffmpeg -i "/tmp/$tag_name.png" -i $4 -c:v libx264 -tune stillimage -c:a copy /tmp/$tag_name.mp4 && source $HOME/youtube-upload/bin/activate && youtube_id=$($HOME/youtube-upload/youtube-upload/bin/youtube-upload --title="$2" --privacy="public" --embeddable=True "/tmp/$tag_name.mp4" | tail -1) && echo "Cargo video del audio de YOUTUBE en el html generado (a tag)." && echo "<h3><a href="\"https://www.youtube.com/embed/$youtube_id">¡¡CLICK PARA ESCUCHAR EL AUDIO EN YOUTUBE!!</a></h3>" >> "posts/$tag_name.html"
-
-#(($# > 3)) && echo "Subimos el audio a YouTube." && echo "Generamos thumbnail para youtube" && thumbnailg "$2" "/tmp/$tag_name.png" && echo "Creando un video a partir del audio..." && ffmpeg -i "/tmp/$tag_name.png" -i $4 -c:v libx264 -tune stillimage -c:a copy /tmp/audio$tag_name.mp4 && source $HOME/youtube-upload/bin/activate && youtube_id=$($HOME/youtube-upload/youtube-upload/bin/youtube-upload --title="$tag_name" --privacy="unlisted" --embeddable=True "/tmp/audio$tag_name.mp4" | tail -1) && echo "Cargo video del audio de YOUTUBE en el html generado (a tag)." && echo "<h3><a href=\"https://www.youtube.com/embed/$youtube_id\">¡¡CLICK PARA ESCUCHAR EL AUDIO EN YOUTUBE!!</a></h3>" >> "posts/$tag_name.html"
+(($# == 4)) && (($5 == 1)) && echo "Subimos el audio a YouTube." && echo "Generamos thumbnail para youtube" && thumbnailg "$2" "/tmp/$tag_name.png" && echo "Creando un video a partir del audio..." && ffmpeg -i "/tmp/$tag_name.png" -i $4 -c:v libx264 -tune stillimage -c:a copy /tmp/$tag_name.mp4 && source $HOME/youtube-upload/bin/activate && youtube_id=$($HOME/youtube-upload/youtube-upload/bin/youtube-upload --title="$2" --privacy="public" --embeddable=True "/tmp/$tag_name.mp4" | tail -1) && echo "Cargo video del audio de YOUTUBE en el html generado (a tag)." && echo "<h3><a href="\"https://www.youtube.com/embed/$youtube_id">¡¡CLICK PARA ESCUCHAR EL AUDIO EN YOUTUBE!!</a></h3>" >> "posts/$tag_name.html"
 
 
 echo "Cargo imagenes de archive en el html generado."
@@ -157,7 +157,7 @@ cd $actual_dir;
 
 echo "<hr>" >> "posts/$tag_name.html"
 echo "<h3>Resumen de un LLM</h3>" >> "posts/$tag_name.html"
-echo "$5" >> "posts/$tag_name.html"
+echo "$6" >> "posts/$tag_name.html"
 
 echo "  </article>" >> "posts/$tag_name.html"
 echo "  <hr>" >> "posts/$tag_name.html"
