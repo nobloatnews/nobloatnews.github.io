@@ -10,6 +10,8 @@ done
 
 # Si pusiste texto no subas el archivo de audio
 
+# 1 o 0 sirve para solo generar el video sin subirlo
+prueba=0
 
 actual_dir=$PWD;
 
@@ -120,6 +122,8 @@ echo "Generando video..."
 (($# == 3)) && ls $3/*.jpg | sort | gen.sh > "/tmp/$tag_name" && cd /tmp && slider -i "$tag_name" -o "/tmp/$tag_name.mp4"
 
 echo "Listo."
+
+((prueba == 1)) && echo "Modo prueba. No subire el video." && exit;
 
 cd $actual_dir;
 
