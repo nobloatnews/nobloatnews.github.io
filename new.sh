@@ -140,16 +140,18 @@ echo "OJO: No se puede subir audio a YouTube lo concatenaré con una imagen."
 echo "Cargo imagenes de archive en el html generado."
 echo "<hr>" >> "posts/$tag_name.html"
 
-##### Subi imagenes a Archive.
-(($# > 2)) && cd $3 && source $HOME/internetarchive/bin/activate && ia upload "$tag_name-images" *
+# Descomenta todo esto para subir imagenes una por una a archive e insertarlas en el html.
 
-cd $actual_dir;
-cantidad_imagenes=$(ls -1 $3 | wc -l)
+#echo "Subo imagenes a Archive"
+#(($# > 2)) && cd $3 && source $HOME/internetarchive/bin/activate && ia upload "$tag_name-images" *
 
-(($# > 2)) && ((cantidad_imagenes >= 10)) && echo "<h3><a href=\"https://archive.org/details/$tag_name-images/\">¡¡¡VER LAS $cantidad_imagenes DE FOTOS EN ARCHIVE!!!!</a></h3>" >> "$actual_dir/posts/$tag_name.html" ; 
+#cd $actual_dir;
+#cantidad_imagenes=$(ls -1 $3 | wc -l)
+
+#(($# > 2)) && ((cantidad_imagenes >= 10)) && echo "<h3><a href=\"https://archive.org/details/$tag_name-images/\">¡¡¡VER LAS $cantidad_imagenes DE FOTOS EN ARCHIVE!!!!</a></h3>" >> "$actual_dir/posts/$tag_name.html" ; 
 
 
-(($# > 2)) && cd $3 && for i in *.jpg; do echo "<a href=\"https://archive.org/download/$tag_name-images/$i\"><img src=\"https://archive.org/download/$tag_name-images/${i%.*}_thumb.jpg\"></a>" >> "$actual_dir/posts/$tag_name.html" ; done
+#(($# > 2)) && cd $3 && for i in *.jpg; do echo "<a href=\"https://archive.org/download/$tag_name-images/$i\"><img src=\"https://archive.org/download/$tag_name-images/${i%.*}_thumb.jpg\"></a>" >> "$actual_dir/posts/$tag_name.html" ; done
 
 
 
