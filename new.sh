@@ -15,7 +15,7 @@ prueba=0
 
 actual_dir=$PWD;
 
-if [ $# -lt 2 ];
+if [ $# -lt 3 ];
   then
           echo "Consejo: si tenes un audio, concatená el audio con una imagen y subilo a YouTube descarga los subtitulos y pasalos a ChatGPT pedile un resumen y luego agregalo como texto entero para generar el audio, eso se hace con el script youtube.fish";
 	  echo "Si queres que el archivo de audio sea por defecto no uses el 5to parametro."
