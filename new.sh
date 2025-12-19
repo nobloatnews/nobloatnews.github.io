@@ -10,7 +10,7 @@ done
 
 # Si pusiste texto no subas el archivo de audio
 
-# 1 o 0 sirve para solo generar el video sin subirlo
+# 1 sirve para solo generar el video sin subirlo
 prueba=0
 
 actual_dir=$PWD;
@@ -101,7 +101,7 @@ sed -i "/<ul>/a\        <li><a href=\"posts/$tag_name.html\">$2</a> – $day $na
 
 
 ## Si pusiste texto como audio. Si queres que el archivo de audio sea por defecto no uses el 6to parametro.
-(($# == 6)) && echo "Generando archivo de audio a partir del texto..." && echo "$6" | espeak-ng -v es -w "/tmp/$tag_name.wav"
+(($# == 6)) && echo "Generando archivo de audio a partir del texto..." && echo "$6" | espeak-ng -m -v es -w "/tmp/$tag_name.wav"
 
 echo "Listo."
 
