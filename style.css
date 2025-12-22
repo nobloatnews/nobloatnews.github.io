@@ -1,6 +1,4 @@
 body {
-  /*font-family: monospace;*/
-
   /* Esto es para centrar el contenido por si la pantalla es muy grande. */
   max-width: 900px;
   margin: auto;
@@ -12,6 +10,8 @@ body {
   line-height: 1.5;
 
   padding: 1em;
+
+  font-size: 28px;
 }
 
 /* Esta propiedad establece el ancho máximo de una imagen en el 100% del ancho de su elemento padre. Esto significa que la imagen no puede ser más ancha que el espacio disponible dentro de su contenedor. Si la imagen es más grande, se reducirá automáticamente para caber en ese espacio, lo que ayuda a evitar que sobrepase los límites de la pantalla o del diseño, especialmente en dispositivos móviles o en layouts responsivos. */
