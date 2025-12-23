@@ -11,7 +11,7 @@ done
 # Si pusiste texto no subas el archivo de audio
 
 # 1 sirve para solo generar el video sin subirlo
-prueba=0
+prueba=1
 
 actual_dir=$PWD;
 

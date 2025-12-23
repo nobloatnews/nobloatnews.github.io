@@ -40,8 +40,7 @@ counter=1
 # Leer el archivo línea por línea
 while IFS= read -r line || [ -n "$line" ]; do
     # Remover el tag de break para obtener solo el texto
-    # SOLUCIÓN: Usar sed con trim manual en lugar de xargs
-    text=$(echo "$line" | sed -E "s/<break time=['\"]?[0-9]+ms['\"]?\/>//g" | sed -e 's/^[[:space:]]*//' -e 's/[[:space:]]*$//')
+    text=$(echo "$line" | sed -E "s/<break time=['\"]?[0-9]+ms['\"]?\/>//g" | xargs)
     
     # Ignorar líneas vacías
     if [ -z "$text" ]; then
