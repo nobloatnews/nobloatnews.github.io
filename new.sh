@@ -103,6 +103,9 @@ sed -i "/<ul>/a\        <li><a href=\"posts/$tag_name.html\">$2</a> – $day $na
 ## Si pusiste texto como audio. Si queres que el archivo de audio sea por defecto no uses el 6to parametro.
 (($# == 6)) && echo "Generando archivo de audio a partir del texto..." && espeak-ng -f "$6" -m -v es -w "/tmp/$tag_name.wav" && bash $actual_dir/break_to_srt.sh "$6" "/tmp/$tag_name.srt" 5000
 
+#(($# == 6)) && echo "Generando archivo de audio a partir del texto..." && espeak-ng -s 120 -p 30 -f "$6" -m -v es -w "/tmp/$tag_name.wav" && python generar_srt.py "$6" 120 30 && mv subtitulos.srt "/tmp/$tag_name.srt" && rm -rf *.wav
+
+
 echo "Listo."
 
 #### GENERAMOS EL VIDEO, si el audio es mas largo que las imagenes tendras que cambiarlo.
@@ -130,6 +133,9 @@ if [ -f "/tmp/$tag_name.srt" ]; then
     mv "/tmp/${tag_name}_con_subs.mp4" "/tmp/$tag_name.mp4"
     echo "Subtítulos quemados correctamente."
 fi
+
+#ffmpeg -i "/tmp/$tag_name.mp4" -filter_complex "[0:v]setpts=0.5*PTS[v];[0:a]atempo=2.0[a]" -map "[v]" -map "[a]" "/tmp/${tag_name}_x2.mp4"
+#mv "/tmp/${tag_name}_x2.mp4" "/tmp/$tag_name.mp4"
 
 ((prueba == 1)) && echo "Modo prueba. No subire el video." && exit;
 

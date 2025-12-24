@@ -1,0 +1,11 @@
+/home/esotericwarfare/samba/nobloatnews/bici/IMG_20251212_190138321.jpg
+Este es el primer párrafo que se va a leer mientras se muestra la primera imagen. Espeak lo leerá completo y la imagen se mostrará durante todo el tiempo que dure la lectura.
+
+/home/esotericwarfare/samba/nobloatnews/bici/IMG_20251212_191105939.jpg
+Acá va el segundo párrafo. Puede ser más corto o más largo que el anterior. La duración de la imagen se ajusta automáticamente al tiempo de lectura.
+
+/home/esotericwarfare/samba/nobloatnews/bici/IMG_20251212_173834758.jpg
+También podés usar rutas con directorios. Este es un párrafo más largo para demostrar que el script calcula automáticamente cuánto tiempo tarda espeak en leer cada texto y ajusta la duración de cada imagen en consecuencia.
+
+/home/esotericwarfare/samba/nobloatnews/bici/IMG_20251212_190144321.jpg
+Último párrafo de ejemplo. Así de simple.
