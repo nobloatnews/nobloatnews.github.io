@@ -22,7 +22,7 @@ if [ $# -lt 3 ];
           echo "Con los siguientes comandos:"
           echo "yt-dlp --ignore-config --write-subs --write-auto-sub --sub-lang es --sub-format \"srt\" --skip-download https://www.youtube.com/watch?v=VIDEO_ID"
           echo "sed -E '/^[0-9]+$|^$/d; /^[0-9]{2}:/d' video.en.srt > subtitles.txt"
-	  echo "Uso: $0 <nombre-archivo> \"<titulo con espacios>\" <ruta del video generado con el script>"
+	  echo "Uso: $0 <nombre-archivo> \"<titulo con espacios>\" <ruta del video generado con el script> <ruta del script>"
 	  echo "Si pones el texto al final, el video se creará con espeak generado con el texto y va a ignorar el archivo de audio."
     exit;
 fi
@@ -79,7 +79,7 @@ cd $actual_dir;
 echo "<hr>" >> "posts/$tag_name.html"
 echo "<h3>Resumen</h3>" >> "posts/$tag_name.html"
 echo "<p>"  >> "posts/$tag_name.html"
-cat "$3" >> "posts/$tag_name.html"
+cat "$4" >> "posts/$tag_name.html"
 echo "</p>" >> "posts/$tag_name.html"
 
 echo "  </article>" >> "posts/$tag_name.html"
