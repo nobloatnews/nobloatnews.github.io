@@ -28,6 +28,7 @@ if [ $# -lt 3 ];
 fi
 
 [ $# -ge 3 ] && [ ! -f "$3" ] && echo "Video no existe" && exit 1
+[ $# -ge 4 ] && [ ! -f "$4" ] && echo "Archivo de texto no existe" && exit 1
 
 
 
