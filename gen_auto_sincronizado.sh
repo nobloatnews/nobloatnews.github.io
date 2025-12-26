@@ -1,4 +1,5 @@
 #!/bin/bash
+# Claude
 set -euo pipefail
 
 rm -rf $HOME/.cache/slider
@@ -30,7 +31,6 @@ WORK_DIR="$TEMP_DIR/work"
 OUTPUT_TIMECODES="timecodes.txt"
 OUTPUT_AUDIO="audio.wav"
 OUTPUT_SRT="subtitles.srt"
-OUTPUT_TEXT="full_text.txt"
 TEMP_VIDEO="temp_video.mp4"
 
 mkdir -p "$WORK_DIR"
@@ -44,6 +44,7 @@ ORIGINAL_DIR=$(pwd)
 declare -a images
 declare -a texts
 declare -a durations
+declare -a audio_files
 
 # Leer el archivo y separar imágenes de textos
 current_image=""
@@ -109,37 +110,34 @@ done
 # Cambiar al directorio de trabajo
 cd "$WORK_DIR"
 
-# Generar audio y calcular duraciones
-echo "=== Generando audio con espeak-ng ==="
+# Generar audios individuales y calcular duraciones exactas
+echo "=== Generando audios individuales con espeak-ng ==="
 
-# Crear archivo de texto completo para espeak
-> "$OUTPUT_TEXT"
-for text in "${texts[@]}"; do
-    echo "$text" >> "$OUTPUT_TEXT"
-done
-
-# Generar el audio completo
-espeak-ng -f "$OUTPUT_TEXT" -v es -w "$OUTPUT_AUDIO"
-
-echo "=== Calculando duraciones de cada párrafo ==="
-
-# Calcular duración de cada párrafo
 current_time=0
 srt_counter=1
 
 # Inicializar archivo SRT
 > "$OUTPUT_SRT"
 
+# Crear lista de archivos de audio para concatenar
+audio_list="audio_list.txt"
+> "$audio_list"
+
 for i in "${!texts[@]}"; do
     text="${texts[$i]}"
     
-    # Crear audio temporal para este párrafo
-    temp_audio="temp_$i.wav"
-    echo "$text" | espeak-ng -v es -w "$temp_audio"
+    # Crear audio para este párrafo
+    audio_file="audio_$(printf "%03d" $i).wav"
+    echo "$text" | espeak-ng -v es -w "$audio_file"
     
-    # Obtener duración en segundos
-    duration=$(ffprobe -v error -show_entries format=duration -of default=noprint_wrappers=1:nokey=1 "$temp_audio")
-    duration_int=$(printf "%.0f" "$duration")
+    audio_files+=("$audio_file")
+    echo "file '$audio_file'" >> "$audio_list"
+    
+    # Obtener duración EXACTA en segundos con precisión decimal
+    duration=$(ffprobe -v error -show_entries format=duration -of default=noprint_wrappers=1:nokey=1 "$audio_file")
+    
+    # Convertir a enteros para los cálculos de tiempo (redondeando hacia arriba)
+    duration_int=$(printf "%.0f" "$(echo "$duration + 0.5" | bc)")
     
     durations+=("$duration_int")
     
@@ -159,10 +157,12 @@ for i in "${!texts[@]}"; do
     srt_counter=$((srt_counter + 1))
     current_time=$end_time
     
-    rm "$temp_audio"
-    
-    echo "  Párrafo ${i}: ${duration_int}s"
+    echo "  Párrafo ${i}: ${duration_int}s (exacto: ${duration}s)"
 done
+
+echo "=== Concatenando audios ==="
+# Concatenar todos los audios en uno solo usando el método concat demuxer
+ffmpeg -y -f concat -safe 0 -i "$audio_list" -c copy "$OUTPUT_AUDIO"
 
 echo "=== Generando archivo de timecodes para slider ==="
 

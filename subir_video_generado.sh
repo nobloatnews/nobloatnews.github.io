@@ -3,7 +3,7 @@ set -euo pipefail
 
 echo "se necesita el comando ia (internet archive)".
 
-for cmd in ffmpeg ffprobe yt-dlp espeak-ng slider gen.sh; do
+for cmd in ffmpeg ffprobe yt-dlp espeak-ng slider ; do
   # ia (internet archive) debe estar dentro de venv python
   command -v "$cmd" >/dev/null || { echo "Falta $cmd"; exit 1; }
 done
@@ -22,13 +22,12 @@ if [ $# -lt 3 ];
           echo "Con los siguientes comandos:"
           echo "yt-dlp --ignore-config --write-subs --write-auto-sub --sub-lang es --sub-format \"srt\" --skip-download https://www.youtube.com/watch?v=VIDEO_ID"
           echo "sed -E '/^[0-9]+$|^$/d; /^[0-9]{2}:/d' video.en.srt > subtitles.txt"
-	  echo "Uso: $0 <nombre-archivo> \"<titulo con espacios>\" <ruta del video generado con el script> <ruta del script>"
+	  echo "Uso: $0 <nombre-archivo> \"<titulo con espacios>\" <ruta del video generado con el script>"
 	  echo "Si pones el texto al final, el video se creará con espeak generado con el texto y va a ignorar el archivo de audio."
     exit;
 fi
 
 [ $# -ge 3 ] && [ ! -f "$3" ] && echo "Video no existe" && exit 1
-[ $# -ge 4 ] && [ ! -f "$4" ] && echo "Archivo de texto no existe" && exit 1
 
 
 
@@ -66,22 +65,22 @@ sed -i "/<ul>/a\        <li><a href=\"posts/$tag_name.html\">$2</a> – $day $na
 
 cd $actual_dir;
 
-echo "Subimos video a YouTube" && source $HOME/youtube-upload/bin/activate && youtube_id=$($HOME/youtube-upload/youtube-upload/bin/youtube-upload --title="$2" --privacy="unlisted" --embeddable=True "$3" | tail -1) && echo "Cargo video de YouTube en el html generado (iframe tag)." && echo "<h3><a href=\"https://www.youtube.com/embed/$youtube_id\">¡¡CLICK PARA VER VIDEO DE LAS FOTOS EN YOUTUBE (con explicación)!!</a></h3>" >> "posts/$tag_name.html"
+#echo "Subimos video a YouTube" && source $HOME/youtube-upload/bin/activate && youtube_id=$($HOME/youtube-upload/youtube-upload/bin/youtube-upload --title="$2" --privacy="unlisted" --embeddable=True "$3" | tail -1) && echo "Cargo video de YouTube en el html generado (iframe tag)." && echo "<h3><a href=\"https://www.youtube.com/embed/$youtube_id\">¡¡CLICK PARA VER VIDEO DE LAS FOTOS EN YOUTUBE (con explicación)!!</a></h3>" >> "posts/$tag_name.html"
 
 echo "Subimos video a Archive.org" && source $HOME/internetarchive/bin/activate && ia upload "$tag_name-video" "$3" && echo "Cargo video de Archive en el html generado (video tag)." && echo "<h3><a href=\"https://archive.org/download/$tag_name-video/$tag_name.mp4\">¡¡CLICK PARA VER VIDEO DE LAS FOTOS EN ARCHIVE (con explicación)!!</a></h3>" >> "posts/$tag_name.html"; 
 
 
 # Si pusiste el 5to argumento como 1 entonces subimos el pseudoaudio
-(($# > 4)) && (($5 == 1)) && echo "Subimos el audio a Archive." && source $HOME/internetarchive/bin/activate && ia upload "$year-$month-$day-$1audio" $4 && echo "<h3><a href=\"https://archive.org/download/$year-$month-$day-$1audio/$4\">¡¡¡Escuchar el Audio del suceso!!!.</a></h3>" >> "posts/$tag_name.html" ; 
+#(($# > 4)) && (($5 == 1)) && echo "Subimos el audio a Archive." && source $HOME/internetarchive/bin/activate && ia upload "$year-$month-$day-$1audio" $4 && echo "<h3><a href=\"https://archive.org/download/$year-$month-$day-$1audio/$4\">¡¡¡Escuchar el Audio del suceso!!!.</a></h3>" >> "posts/$tag_name.html" ; 
 
 
 cd $actual_dir;
 
 echo "<hr>" >> "posts/$tag_name.html"
-echo "<h3>Resumen</h3>" >> "posts/$tag_name.html"
-echo "<p>"  >> "posts/$tag_name.html"
-cat "$4" >> "posts/$tag_name.html"
-echo "</p>" >> "posts/$tag_name.html"
+#echo "<h3>Resumen</h3>" >> "posts/$tag_name.html"
+#echo "<p>"  >> "posts/$tag_name.html"
+#cat "$4" >> "posts/$tag_name.html"
+#echo "</p>" >> "posts/$tag_name.html"
 
 echo "  </article>" >> "posts/$tag_name.html"
 echo "  <hr>" >> "posts/$tag_name.html"
@@ -90,5 +89,3 @@ echo "  </center>" >> "posts/$tag_name.html"
 echo "</body>" >> "posts/$tag_name.html"
 echo "</html>" >> "posts/$tag_name.html"
 
-
-git add . && git commit -m "posts/$year-$month-$day-$1.html" && git push
