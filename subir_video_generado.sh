@@ -7,6 +7,8 @@ for cmd in ffmpeg ffprobe yt-dlp espeak-ng slider ; do
   # ia (internet archive) debe estar dentro de venv python
   command -v "$cmd" >/dev/null || { echo "Falta $cmd"; exit 1; }
 done
+filename="${3##*/}"
+echo $filename
 
 # Si pusiste texto no subas el archivo de audio
 
@@ -67,8 +69,6 @@ cd $actual_dir;
 
 #echo "Subimos video a YouTube" && source $HOME/youtube-upload/bin/activate && youtube_id=$($HOME/youtube-upload/youtube-upload/bin/youtube-upload --title="$2" --privacy="unlisted" --embeddable=True "$3" | tail -1) && echo "Cargo video de YouTube en el html generado (iframe tag)." && echo "<h3><a href=\"https://www.youtube.com/embed/$youtube_id\">¡¡CLICK PARA VER VIDEO DE LAS FOTOS EN YOUTUBE (con explicación)!!</a></h3>" >> "posts/$tag_name.html"
 
-filename="${3##*/}"
-echo $filename
 
 echo "Subimos video a Archive.org" && source $HOME/internetarchive/bin/activate && ia upload "$tag_name-video" "$3" && echo "Cargo video de Archive en el html generado (video tag)." && echo "<h3><a href=\"https://archive.org/download/$tag_name-video/$filename\">¡¡CLICK PARA VER VIDEO DE LAS FOTOS EN ARCHIVE (con explicación)!!</a></h3>" >> "posts/$tag_name.html"; 
 
