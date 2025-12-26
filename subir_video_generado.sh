@@ -7,8 +7,7 @@ for cmd in ffmpeg ffprobe yt-dlp espeak-ng slider ; do
   # ia (internet archive) debe estar dentro de venv python
   command -v "$cmd" >/dev/null || { echo "Falta $cmd"; exit 1; }
 done
-filename="${3##*/}"
-echo $filename
+
 
 # Si pusiste texto no subas el archivo de audio
 
@@ -32,6 +31,8 @@ fi
 [ $# -ge 3 ] && [ ! -f "$3" ] && echo "Video no existe" && exit 1
 
 
+filename="${3##*/}"
+echo $filename
 
 year=$(date +%Y)
 month=$(date +%m)
