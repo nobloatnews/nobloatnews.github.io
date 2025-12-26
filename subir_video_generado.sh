@@ -89,3 +89,4 @@ echo "  </center>" >> "posts/$tag_name.html"
 echo "</body>" >> "posts/$tag_name.html"
 echo "</html>" >> "posts/$tag_name.html"
 
+git add . && git commit -m $tag_name && git push
