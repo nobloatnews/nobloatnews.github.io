@@ -11,7 +11,9 @@ done
 # Si pusiste texto no subas el archivo de audio
 
 # 1 sirve para solo generar el video sin subirlo
-prueba=1
+prueba=0
+
+((prueba==1)) && echo "MODO PRUEBA ACTIVADO!"
 
 actual_dir=$PWD;
 
@@ -101,10 +103,10 @@ sed -i "/<ul>/a\        <li><a href=\"posts/$tag_name.html\">$2</a> – $day $na
 
 
 ## Si pusiste texto como audio. Si queres que el archivo de audio sea por defecto no uses el 6to parametro.
-(($# == 6)) && echo "Generando archivo de audio a partir del texto..." && espeak-ng -f "$6" -m -v es -w "/tmp/$tag_name.wav" && bash $actual_dir/break_to_srt.sh "$6" "/tmp/$tag_name.srt" 5000
+
+(($# == 6)) && echo "Generando archivo de audio a partir del texto..." && espeak-ng -f "$6" -m -v es -w "/tmp/$tag_name.wav"
 
 #(($# == 6)) && echo "Generando archivo de audio a partir del texto..." && espeak-ng -s 120 -p 30 -f "$6" -m -v es -w "/tmp/$tag_name.wav" && python generar_srt.py "$6" 120 30 && mv subtitulos.srt "/tmp/$tag_name.srt" && rm -rf *.wav
-
 
 echo "Listo."
 
@@ -141,7 +143,7 @@ fi
 
 cd $actual_dir;
 
-(($# > 2)) && echo "Subimos video a YouTube" && source $HOME/youtube-upload/bin/activate && youtube_id=$($HOME/youtube-upload/youtube-upload/bin/youtube-upload --title="$2" --privacy="public" --embeddable=True "/tmp/$tag_name.mp4" | tail -1) && echo "Cargo video de YouTube en el html generado (iframe tag)." && echo "<h3><a href=\"https://www.youtube.com/embed/$youtube_id\">¡¡CLICK PARA VER VIDEO DE LAS FOTOS EN YOUTUBE (con explicación)!!</a></h3>" >> "posts/$tag_name.html"
+(($# > 2)) && echo "Subimos video a YouTube" && source $HOME/youtube-upload/bin/activate && youtube_id=$($HOME/youtube-upload/youtube-upload/bin/youtube-upload --title="$2" --privacy="unlisted" --embeddable=True "/tmp/$tag_name.mp4" | tail -1) && echo "Cargo video de YouTube en el html generado (iframe tag)." && echo "<h3><a href=\"https://www.youtube.com/embed/$youtube_id\">¡¡CLICK PARA VER VIDEO DE LAS FOTOS EN YOUTUBE (con explicación)!!</a></h3>" >> "posts/$tag_name.html"
 
 (($# > 2)) && echo "Subimos video a Archive.org" && source $HOME/internetarchive/bin/activate && ia upload "$tag_name-video" "/tmp/$tag_name.mp4" && echo "Cargo video de Archive en el html generado (video tag)." && echo "<h3><a href=\"https://archive.org/download/$tag_name-video/$tag_name.mp4\">¡¡CLICK PARA VER VIDEO DE LAS FOTOS EN ARCHIVE (con explicación)!!</a></h3>" >> "posts/$tag_name.html"; 
 
@@ -152,7 +154,7 @@ cd $actual_dir;
 
 echo "OJO: No se puede subir audio a YouTube lo concatenaré con una imagen."
 
-(($# > 4)) && (($5 == 1)) && echo "Subimos el audio a YouTube." && echo "Generamos thumbnail para youtube" && thumbnailg "$2" "/tmp/$tag_name.png" && echo "Creando un video a partir del audio..." && ffmpeg -i "/tmp/$tag_name.png" -i $4 -c:v libx264 -tune stillimage -c:a copy /tmp/$tag_name.mp4 && source $HOME/youtube-upload/bin/activate && youtube_id=$($HOME/youtube-upload/youtube-upload/bin/youtube-upload --title="$2" --privacy="public" --embeddable=True "/tmp/$tag_name.mp4" | tail -1) && echo "Cargo video del audio de YOUTUBE en el html generado (a tag)." && echo "<h3><a href="\"https://www.youtube.com/embed/$youtube_id">¡¡CLICK PARA ESCUCHAR EL AUDIO EN YOUTUBE!!</a></h3>" >> "posts/$tag_name.html"
+(($# > 4)) && (($5 == 1)) && echo "Subimos el audio a YouTube." && echo "Generamos thumbnail para youtube" && thumbnailg "$2" "/tmp/$tag_name.png" && echo "Creando un video a partir del audio..." && ffmpeg -i "/tmp/$tag_name.png" -i $4 -c:v libx264 -tune stillimage -c:a copy /tmp/$tag_name.mp4 && source $HOME/youtube-upload/bin/activate && youtube_id=$($HOME/youtube-upload/youtube-upload/bin/youtube-upload --title="$2" --privacy="unlisted" --embeddable=True "/tmp/$tag_name.mp4" | tail -1) && echo "Cargo video del audio de YOUTUBE en el html generado (a tag)." && echo "<h3><a href="\"https://www.youtube.com/embed/$youtube_id">¡¡CLICK PARA ESCUCHAR EL AUDIO EN YOUTUBE!!</a></h3>" >> "posts/$tag_name.html"
 
 
 echo "Cargo imagenes de archive en el html generado."
