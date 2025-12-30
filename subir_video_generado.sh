@@ -23,15 +23,16 @@ if [ $# -lt 3 ];
           echo "Con los siguientes comandos:"
           echo "yt-dlp --ignore-config --write-subs --write-auto-sub --sub-lang es --sub-format \"srt\" --skip-download https://www.youtube.com/watch?v=VIDEO_ID"
           echo "sed -E '/^[0-9]+$|^$/d; /^[0-9]{2}:/d' video.en.srt > subtitles.txt"
-	  echo "Uso: $0 <nombre-archivo> \"<titulo con espacios>\" <ruta del video generado con el script>" "<ruta carpeta de imagenes>"
+	  echo "Uso: $0 <nombre-archivo> \"<titulo con espacios>\" <ruta del video generado con el script>" "<ruta carpeta de imagenes> <ruta archivo texto del script>"
 	  echo "Si pones el texto al final, el video se creará con espeak generado con el texto y va a ignorar el archivo de audio."
     exit;
 fi
 
-[ $# -lt 4 ] && echo "Faltan argumentos. Bye" && exit 1
+[ $# -lt 5 ] && echo "Faltan argumentos. Bye" && exit 1
 
 [ $# -ge 3 ] && [ ! -f "$3" ] && echo "Video no existe" && exit 1
 [ $# -ge 4 ] && [ ! -d "$4" ] && echo "La ruta no existe" && exit 1
+[ $# -ge 5 ] && [ ! -f "$5" ] && echo "El archivo no existe" && exit 1
 
 
 filename="${3##*/}"
@@ -82,7 +83,7 @@ cd $actual_dir;
 echo "<hr>" >> "posts/$tag_name.html"
 echo "<h3>Resumen</h3>" >> "posts/$tag_name.html"
 echo "<p>"  >> "posts/$tag_name.html"
-cat "$3" >> "posts/$tag_name.html"
+cat "$5" >> "posts/$tag_name.html"
 echo "</p>" >> "posts/$tag_name.html"
 
 
