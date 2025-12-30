@@ -93,15 +93,15 @@ echo "<hr>" >> "posts/$tag_name.html"
 # Descomenta todo esto para subir imagenes una por una a archive e insertarlas en el html.
 
 echo "Subo imagenes a Archive"
-(($# == 4)) && cd $4 && source $HOME/internetarchive/bin/activate && ia upload "$tag_name-images" *
+cd $4 && source $HOME/internetarchive/bin/activate && ia upload "$tag_name-images" *
 
 cd $actual_dir;
 cantidad_imagenes=$(ls -1 $4 | wc -l)
 
-(($# == 4)) && ((cantidad_imagenes >= 20)) && echo "<h3><a href=\"https://archive.org/details/$tag_name-images/\">¡¡¡VER LAS $cantidad_imagenes DE FOTOS EN ARCHIVE!!!!</a></h3>" >> "$actual_dir/posts/$tag_name.html" ; 
+((cantidad_imagenes >= 20)) && echo "<h3><a href=\"https://archive.org/details/$tag_name-images/\">¡¡¡VER LAS $cantidad_imagenes DE FOTOS EN ARCHIVE!!!!</a></h3>" >> "$actual_dir/posts/$tag_name.html" ; 
 
 
-(($# == 4)) && cd $4 && for i in *.jpg; do echo "<a href=\"https://archive.org/download/$tag_name-images/$i\"><img src=\"https://archive.org/download/$tag_name-images/${i%.*}_thumb.jpg\"></a>" >> "$actual_dir/posts/$tag_name.html" ; done
+cd $4 && for i in *.jpg; do echo "<a href=\"https://archive.org/download/$tag_name-images/$i\"><img src=\"https://archive.org/download/$tag_name-images/${i%.*}_thumb.jpg\"></a>" >> "$actual_dir/posts/$tag_name.html" ; done
 
 
 cd $actual_dir;
