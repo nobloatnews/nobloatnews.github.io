@@ -190,3 +190,5 @@ echo ""
 echo "=== ¡Video generado exitosamente! ==="
 echo "Archivo: $OUTPUT_VIDEO"
 echo ""
+
+mv $OUTPUT_VIDEO /tmp

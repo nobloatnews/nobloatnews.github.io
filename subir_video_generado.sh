@@ -23,12 +23,15 @@ if [ $# -lt 3 ];
           echo "Con los siguientes comandos:"
           echo "yt-dlp --ignore-config --write-subs --write-auto-sub --sub-lang es --sub-format \"srt\" --skip-download https://www.youtube.com/watch?v=VIDEO_ID"
           echo "sed -E '/^[0-9]+$|^$/d; /^[0-9]{2}:/d' video.en.srt > subtitles.txt"
-	  echo "Uso: $0 <nombre-archivo> \"<titulo con espacios>\" <ruta del video generado con el script>"
+	  echo "Uso: $0 <nombre-archivo> \"<titulo con espacios>\" <ruta del video generado con el script>" "<ruta carpeta de imagenes>"
 	  echo "Si pones el texto al final, el video se creará con espeak generado con el texto y va a ignorar el archivo de audio."
     exit;
 fi
 
+[ $# -lt 4 ] && echo "Faltan argumentos. Bye" && exit 1
+
 [ $# -ge 3 ] && [ ! -f "$3" ] && echo "Video no existe" && exit 1
+[ $# -ge 4 ] && [ ! -d "$4" ] && echo "La ruta no existe" && exit 1
 
 
 filename="${3##*/}"
@@ -74,17 +77,35 @@ cd $actual_dir;
 echo "Subimos video a Archive.org" && source $HOME/internetarchive/bin/activate && ia upload "$tag_name-video" "$3" && echo "Cargo video de Archive en el html generado (video tag)." && echo "<h3><a href=\"https://archive.org/download/$tag_name-video/$filename\">¡¡CLICK PARA VER VIDEO DE LAS FOTOS EN ARCHIVE (con explicación)!!</a></h3>" >> "posts/$tag_name.html"; 
 
 
-# Si pusiste el 5to argumento como 1 entonces subimos el pseudoaudio
-#(($# > 4)) && (($5 == 1)) && echo "Subimos el audio a Archive." && source $HOME/internetarchive/bin/activate && ia upload "$year-$month-$day-$1audio" $4 && echo "<h3><a href=\"https://archive.org/download/$year-$month-$day-$1audio/$4\">¡¡¡Escuchar el Audio del suceso!!!.</a></h3>" >> "posts/$tag_name.html" ; 
+cd $actual_dir;
+
+echo "<hr>" >> "posts/$tag_name.html"
+echo "<h3>Resumen</h3>" >> "posts/$tag_name.html"
+echo "<p>"  >> "posts/$tag_name.html"
+cat "$3" >> "posts/$tag_name.html"
+echo "</p>" >> "posts/$tag_name.html"
+
+
+echo "Cargo imagenes de archive en el html generado."
+echo "<hr>" >> "posts/$tag_name.html"
+
+# Descomenta todo esto para subir imagenes una por una a archive e insertarlas en el html.
+
+echo "Subo imagenes a Archive"
+(($# == 4)) && cd $4 && source $HOME/internetarchive/bin/activate && ia upload "$tag_name-images" *
+
+cd $actual_dir;
+cantidad_imagenes=$(ls -1 $4 | wc -l)
+
+(($# == 4)) && ((cantidad_imagenes >= 20)) && echo "<h3><a href=\"https://archive.org/details/$tag_name-images/\">¡¡¡VER LAS $cantidad_imagenes DE FOTOS EN ARCHIVE!!!!</a></h3>" >> "$actual_dir/posts/$tag_name.html" ; 
+
+
+(($# == 4)) && cd $4 && for i in *.jpg; do echo "<a href=\"https://archive.org/download/$tag_name-images/$i\"><img src=\"https://archive.org/download/$tag_name-images/${i%.*}_thumb.jpg\"></a>" >> "$actual_dir/posts/$tag_name.html" ; done
 
 
 cd $actual_dir;
 
-echo "<hr>" >> "posts/$tag_name.html"
-#echo "<h3>Resumen</h3>" >> "posts/$tag_name.html"
-#echo "<p>"  >> "posts/$tag_name.html"
-#cat "$4" >> "posts/$tag_name.html"
-#echo "</p>" >> "posts/$tag_name.html"
+
 
 echo "  </article>" >> "posts/$tag_name.html"
 echo "  <hr>" >> "posts/$tag_name.html"
