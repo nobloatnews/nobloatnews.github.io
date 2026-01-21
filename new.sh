@@ -1,3 +1,5 @@
+# Este archivo crea un video con un texto pero no sigue el texto en
+# coordinación con las imágenes.
 #!/bin/bash
 set -euo pipefail
 

@@ -1,3 +1,5 @@
+# Este script crea un video con imágenes pero las imágenes están coordinadas
+# con el texto.
 #!/bin/bash
 set -euo pipefail
 
