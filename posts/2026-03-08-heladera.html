@@ -39,6 +39,7 @@
 
   <hr>
 
+  <h2>ClaudeAI</h2>
   <h2>Resumen del problema</h2>
 
   <p>
@@ -171,6 +172,155 @@
   <p>
     El problema del hielo en el condensador trasero <strong>no se resuelve con los pasos 1 al 5</strong>. Esos pasos mejoran el defrost y eliminan la pérdida de agua, pero el circuito de refrigerante requiere diagnóstico con herramientas específicas (manifold, vacuómetro, balanza de carga). Mientras ese problema no se resuelva, la heladera continuará siendo ineficiente y el compresor trabajará en condiciones anormales de presión, acortando su vida útil.
   </p>
+
+<h3>ChatGPT</h3>
+
+<h1>Diagnóstico técnico - Heladera que pierde agua abajo y acumula hielo</h1>
+
+<h2>1. Síntomas observados</h2>
+<ul>
+<li>Se forma mucho hielo en el evaporador (radiador trasero).</li>
+<li>La heladera pierde agua abajo.</li>
+<li>El drenaje a veces queda tapado por hielo.</li>
+<li>El ventilador funciona mejor cuando no está el plástico.</li>
+<li>La resistencia existe pero no siempre alcanza a derretir todo el hielo.</li>
+<li>El reloj entra en modo deshielo (la heladera se detiene).</li>
+</ul>
+
+<h2>2. Cómo debería funcionar el sistema</h2>
+
+<p>Una heladera no frost tiene tres componentes principales en el deshielo:</p>
+
+<ul>
+<li><b>Reloj de deshielo (timer)</b> → cada varias horas corta el compresor.</li>
+<li><b>Resistencia</b> → derrite el hielo del evaporador.</li>
+<li><b>Bimetálico</b> → corta la resistencia cuando ya no hay hielo.</li>
+</ul>
+
+<p>El ciclo normal es:</p>
+
+<ol>
+<li>El reloj corta la refrigeración.</li>
+<li>La resistencia se enciende.</li>
+<li>El hielo se derrite.</li>
+<li>El bimetálico corta la resistencia cuando la temperatura sube.</li>
+<li>El agua baja por el caño de drenaje.</li>
+</ol>
+
+<h2>3. Qué problema parece estar ocurriendo</h2>
+
+<p>Por lo que describís, el sistema está funcionando <b>a medias</b>.</p>
+
+<p>El reloj entra en deshielo, pero:</p>
+
+<ul>
+<li>No se derrite todo el hielo.</li>
+<li>El drenaje se tapa con hielo.</li>
+<li>El agua queda acumulada y luego chorrea por abajo.</li>
+</ul>
+
+<p>Esto coincide con fallas típicas del sistema de deshielo. :contentReference[oaicite:1]{index=1}</p>
+
+<h2>4. Posibles causas (ordenadas por probabilidad)</h2>
+
+<h3>1. Bimetálico defectuoso (MUY común)</h3>
+
+<ul>
+<li>Puede cortar demasiado rápido.</li>
+<li>La resistencia deja de calentar antes de que se derrita todo el hielo.</li>
+<li>Queda hielo acumulado.</li>
+<li>El drenaje se congela.</li>
+</ul>
+
+<p>Esto es muy común porque el bimetálico trabaja con mucha corriente.</p>
+
+<h3>2. Resistencia débil o parcialmente dañada</h3>
+
+<ul>
+<li>Calienta pero no lo suficiente.</li>
+<li>Derrite un poco de hielo pero no todo.</li>
+</ul>
+
+<h3>3. Drenaje parcialmente tapado</h3>
+
+<ul>
+<li>El agua del deshielo no baja bien.</li>
+<li>Se vuelve a congelar.</li>
+<li>Termina saliendo agua por abajo.</li>
+</ul>
+
+<h3>4. Falta del plástico o conducto de aire</h3>
+
+<p>Ese plástico normalmente:</p>
+
+<ul>
+<li>Guía el aire del ventilador.</li>
+<li>Evita que el aire frío choque directo contra el evaporador.</li>
+</ul>
+
+<p>Si no está:</p>
+
+<ul>
+<li>Se genera hielo irregular.</li>
+<li>Puede congelarse el drenaje.</li>
+</ul>
+
+<h2>5. Por qué la heladera chorrea agua</h2>
+
+<p>La secuencia probable es:</p>
+
+<ol>
+<li>Se forma mucho hielo.</li>
+<li>El deshielo derrite solo una parte.</li>
+<li>El drenaje está parcialmente tapado.</li>
+<li>El agua queda acumulada.</li>
+<li>Cuando abrís la puerta o se derrite más, el agua cae abajo.</li>
+</ol>
+
+<h2>6. Pruebas técnicas recomendadas</h2>
+
+<h3>Probar resistencia</h3>
+
+<ul>
+<li>Medir continuidad.</li>
+<li>Normalmente entre 50Ω y 120Ω según modelo.</li>
+</ul>
+
+<h3>Probar bimetálico</h3>
+
+<ul>
+<li>En frío debe tener continuidad.</li>
+<li>En caliente debe abrir.</li>
+</ul>
+
+<h3>Revisar drenaje</h3>
+
+<ul>
+<li>Soplar el caño.</li>
+<li>Pasar agua caliente.</li>
+<li>Ver si sale al recipiente de atrás.</li>
+</ul>
+
+<h2>7. Diagnóstico más probable</h2>
+
+<p><b>Lo más probable en tu caso:</b></p>
+
+<p>
+Bimetálico que corta antes de tiempo + drenaje que se congela.
+</p>
+
+<p>
+Por eso el deshielo funciona pero no alcanza para limpiar todo el evaporador.
+</p>
+
+<h2>8. Solución recomendada</h2>
+
+<ul>
+<li>Cambiar el bimetálico.</li>
+<li>Revisar resistencia.</li>
+<li>Destapar drenaje.</li>
+<li>Volver a colocar el plástico de conducción de aire.</li>
+</ul>
 
 
   </article>
