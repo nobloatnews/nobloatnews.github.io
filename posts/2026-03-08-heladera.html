@@ -2,7 +2,7 @@
 <html lang="es">
 <head>
   <meta charset="utf-8">
-  <title>Heladera funciona de forma ineficiente y pierde agua abajo, no derrite bien hielo.</title>
+  <title>Heladera funciona de forma ineficiente y pierde agua abajo, no derrite bien hielo. Al parecer bimetallico fallado no activa resistencia.</title>
   <link rel="stylesheet" href="../style.css">
   <meta name="viewport" content="width=device-width, initial-scale=1">
 </head>
@@ -18,6 +18,8 @@
 <p>heladera pierde agua abajo y la heladera puede andar mejor</p>
 
 <p>veo que se forma el hielo y no le opngo el plastico porque n</p>
+
+<p>el hielo se forma en el radiador atras</p>
 
 <p>ahi esta e l telgopor falta el plastico que hace qu eno pueda octocar el ventilador pero no pongo porque hace hielo y cuando pongo eso ahi tampan los condcutores de heilo cuand ono esta eso el agujero es mas grande entonces funciona mejor el ventilador pero si anda bien la reistencia derrite igual el prbolma es que ahora cuando vos empezasa a hacer mucho hielo no derrite </p>
 
@@ -35,6 +37,140 @@
 
 <p>o se ael reloj anda se para pero esa parada doepende si aldcanza ao no para derretir hielo pasa el aire per on otodo el hielo se derrite por eso que yo digo que no sale el agua no se va el agua pro e ll cañao t acw intentamos soplar se va por dentro queda ahi abajo cumple a medias la tarea es para revisar en otro momento cuand ohaya menos calor sacara y ver </p>
 
+  <hr>
+
+  <h2>Resumen del problema</h2>
+
+  <p>
+    La heladera presenta acumulación excesiva de hielo en el evaporador, defrost incompleto y pérdida de agua por debajo del gabinete.
+    Adicionalmente se detectó formación de hielo en el radiador trasero (condensador), lo cual indica un problema en el circuito de refrigerante.
+    El sistema de descongelamiento automático cumple parcialmente su función.
+  </p>
+
+  <hr>
+
+  <h2>Descripción del sistema de defrost automático</h2>
+
+  <p>El sistema de descongelamiento automático de esta heladera está compuesto por los siguientes elementos:</p>
+
+  <ul>
+    <li><strong>Timer o reloj de defrost:</strong> Controla los ciclos. Mantiene la heladera apagada aproximadamente 1 hora para que la resistencia actúe. Si el timer falla y queda en posición de defrost indefinidamente, la resistencia quema componentes plásticos.</li>
+    <li><strong>Resistencia de defrost:</strong> Se activa por orden del timer y calienta el evaporador para derretir el hielo acumulado.</li>
+    <li><strong>Termostato bimetálico (limitador térmico):</strong> Está físicamente pegado al caño del evaporador. Su función es cortar la corriente de la resistencia cuando detecta que el hielo terminó de derretirse y la temperatura del caño sube. Maneja corriente de línea directamente. Si el bimetálico queda pegado en posición abierta (circuito abierto), la resistencia no enciende y el hielo no se derrite. Si queda en posición cerrada (cortocircuito bimetálico), la resistencia trabaja sin límite y puede quemar el plástico del evaporador.</li>
+    <li><strong>Caño de drenaje:</strong> Conduce el agua producto del deshielo hacia la bandeja evaporadora ubicada sobre el compresor. Si está obstruido, el agua se acumula en el fondo del freezer y eventualmente desborda hacia abajo del gabinete.</li>
+    <li><strong>Tapa plástica del evaporador y telgopor:</strong> Guían el flujo de aire del ventilador a través del evaporador. Sin esta tapa, el ventilador trabaja con menor restricción pero el sistema pierde eficiencia de intercambio térmico y se acumula más escarcha en zonas no controladas.</li>
+  </ul>
+
+  <hr>
+
+  <h2>Diagnóstico técnico por síntoma</h2>
+
+  <h3>1. Formación excesiva de hielo en el evaporador</h3>
+  <p>
+    <strong>Causa principal:</strong> El bimetálico está fallado en posición abierta (no conduce). La resistencia no enciende o enciende insuficientemente, por lo que el hielo acumulado en cada ciclo no se derrite en su totalidad. Con cada ciclo de enfriamiento se agrega más hielo al que ya quedó del ciclo anterior, generando acumulación progresiva.
+  </p>
+  <p>
+    <strong>Causa secundaria:</strong> La tapa plástica del evaporador está retirada. Esto genera un flujo de aire desordenado que deposita humedad en zonas más amplias del evaporador, aumentando la formación de escarcha.
+  </p>
+  <p>
+    <strong>Verificación del bimetálico:</strong> Medir continuidad con multímetro a temperatura ambiente (debería dar continuidad = circuito cerrado). Si no da continuidad en frío, está fallado en abierto y debe reemplazarse. Son componentes económicos y de fácil reemplazo.
+  </p>
+  <p>
+    <strong>Verificación de la resistencia:</strong> Con el circuito desconectado, medir resistencia óhmica. Una resistencia en buen estado típicamente mide entre 20 y 100 ohms según el modelo. Si da circuito abierto, está quemada.
+  </p>
+
+  <h3>2. Hielo formado en el radiador trasero (condensador)</h3>
+  <p>
+    <strong>Este síntoma es independiente del sistema de defrost y es el más crítico del diagnóstico.</strong>
+  </p>
+  <p>
+    El condensador trabaja en la parte de alta presión y alta temperatura del ciclo de refrigeración. Nunca debería estar frío al tacto ni formar hielo. La presencia de hielo en el condensador indica uno de los siguientes problemas en el circuito de refrigerante:
+  </p>
+  <ul>
+    <li><strong>Restricción parcial en el capilar o filtro deshidratador:</strong> El capilar es el tubo de diámetro muy reducido que genera la caída de presión entre el lado de alta y el lado de baja. Si está parcialmente obstruido (por humedad congelada, aceite carbonizado o suciedad), el refrigerante no circula correctamente. El resultado es que el evaporador no recibe suficiente líquido, la presión de alta cae, y el gas puede expandirse prematuramente en el condensador, enfriándolo. <strong>Esta es la causa más probable dado el síntoma descrito.</strong></li>
+    <li><strong>Carga de refrigerante baja por pérdida:</strong> Con poco gas, la presión de alta cae, el condensador no disipa calor correctamente y puede aparecer escarcha en sectores del circuito de alta. Se detecta midiendo presiones con manifold: presión de alta baja con compresor funcionando indica pérdida o restricción.</li>
+    <li><strong>Filtro deshidratador saturado:</strong> El filtro acumula humedad hasta saturarse. La humedad dentro del circuito se congela en el punto de menor temperatura (capilar o entrada del evaporador) generando una restricción dinámica: la heladera enfría bien al principio y progresivamente pierde capacidad hasta parar.</li>
+  </ul>
+  <p>
+    <strong>Procedimiento de diagnóstico del circuito:</strong>
+  </p>
+  <ol>
+    <li>Conectar manifold en el punto de servicio (lado de baja, tubería de aspiración del compresor).</li>
+    <li>Registrar presión de baja con compresor funcionando. Para R-134a a temperatura ambiente, presión de baja normal: 0 a 2 PSI aprox. en heladera doméstica.</li>
+    <li>Si la presión de baja es negativa (vacío): restricción severa en capilar o filtro.</li>
+    <li>Tocar el capilar a lo largo de su recorrido buscando el punto donde empieza el frío anormal: ese es el punto de restricción.</li>
+    <li>Tocar el filtro deshidratador: si está frío o con escarcha, está restringido.</li>
+  </ol>
+
+  <h3>3. Pérdida de agua por debajo del gabinete</h3>
+  <p>
+    <strong>Causa directa:</strong> El caño de drenaje del evaporador está obstruido. El agua producto del deshielo (aunque sea parcial) no puede evacuarse hacia la bandeja del compresor y se acumula en el fondo del compartimento freezer. Al abrir la puerta o al completarse el deshielo, el agua derrama hacia abajo del gabinete.
+  </p>
+  <p>
+    <strong>Causa raíz:</strong> El hielo acumulado por los ciclos de defrost incompletos termina tapando la entrada del caño de drenaje. Al derretirse parcialmente (por calor ambiente cuando la heladera para), el agua no tiene salida.
+  </p>
+  <p>
+    <strong>Procedimiento de limpieza del drenaje:</strong>
+  </p>
+  <ol>
+    <li>Retirar todos los alimentos y desconectar la heladera.</li>
+    <li>Retirar la tapa del evaporador, telgopor y ventilador para acceder completamente al evaporador.</li>
+    <li>Derretir todo el hielo acumulado con pistola de calor o agua tibia (nunca elemento cortante).</li>
+    <li>Localizar el orificio de drenaje en la base del evaporador.</li>
+    <li>Introducir un alambre fino o usar aire comprimido para desobstruir el caño desde arriba.</li>
+    <li>Verter agua tibia por el orificio y verificar que salga libremente por la bandeja inferior del compresor.</li>
+    <li>Si el caño tiene goma o tapón en la salida inferior, verificar que no esté obstruido también desde abajo.</li>
+  </ol>
+
+  <hr>
+
+  <h2>Plan de reparación recomendado</h2>
+
+  <ol>
+    <li>
+      <strong>Paso 1 — Descongelamiento total manual:</strong>
+      Desconectar la heladera y descongelar completamente. Esto permite acceder a todos los componentes y es condición necesaria para los siguientes pasos.
+    </li>
+    <li>
+      <strong>Paso 2 — Limpiar caño de drenaje:</strong>
+      Desobstruir el caño completamente y verificar el recorrido hasta la bandeja del compresor. Resolver el síntoma de pérdida de agua.
+    </li>
+    <li>
+      <strong>Paso 3 — Verificar y reemplazar bimetálico:</strong>
+      Medir continuidad. Si está en circuito abierto a temperatura ambiente, reemplazar. Es la causa más probable del defrost incompleto.
+    </li>
+    <li>
+      <strong>Paso 4 — Verificar resistencia de defrost:</strong>
+      Medir ohms. Si está abierta, reemplazar junto con el bimetálico.
+    </li>
+    <li>
+      <strong>Paso 5 — Reponer tapa plástica del evaporador:</strong>
+      Colocar correctamente la tapa y el telgopor para que el flujo de aire sea el correcto. El sistema fue diseñado con esa tapa y sin ella el defrost no cubre uniformemente toda la superficie del evaporador.
+    </li>
+    <li>
+      <strong>Paso 6 — Diagnóstico del circuito de refrigerante:</strong>
+      Con manifold, verificar presiones. Si hay restricción en capilar o filtro deshidratador, proceder a:
+      <ul>
+        <li>Recuperar el gas (no ventear a la atmósfera).</li>
+        <li>Reemplazar filtro deshidratador.</li>
+        <li>Si el capilar está obstruido: limpiar con nitrógeno a presión o reemplazar el capilar.</li>
+        <li>Realizar vacío profundo (mínimo 500 micrones).</li>
+        <li>Recargar con la cantidad y tipo de gas especificado en la chapa de datos del compresor.</li>
+      </ul>
+    </li>
+    <li>
+      <strong>Paso 7 — Verificar funcionamiento del timer:</strong>
+      Comprobar que el timer avance correctamente y que los tiempos de defrost y enfriamiento sean los del diseño del equipo.
+    </li>
+  </ol>
+
+  <hr>
+
+  <h2>Observación final</h2>
+
+  <p>
+    El problema del hielo en el condensador trasero <strong>no se resuelve con los pasos 1 al 5</strong>. Esos pasos mejoran el defrost y eliminan la pérdida de agua, pero el circuito de refrigerante requiere diagnóstico con herramientas específicas (manifold, vacuómetro, balanza de carga). Mientras ese problema no se resuelva, la heladera continuará siendo ineficiente y el compresor trabajará en condiciones anormales de presión, acortando su vida útil.
+  </p>
 
 
   </article>
