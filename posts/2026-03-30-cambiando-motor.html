@@ -18,6 +18,241 @@
 <h3><a href="https://archive.org/download/2026-03-30-cambiando-motor-video/2026-03-30-cambiando-motor.mp4">¡¡CLICK PARA VER VIDEO DE LAS FOTOS EN ARCHIVE (con explicación)!!</a></h3>
 <hr>
 <h3><a href="https://archive.org/details/2026-03-30-cambiando-motor-images/">¡¡¡VER LAS 137 DE FOTOS EN ARCHIVE!!!!</a></h3>
+
+<h3>Chat.Z.ai ayudo a saber como conectar el motor, aca esta la conversacion.</h3>
+
+
+<blockquote>
+<p>tengo un motor monofásico. quiero saber cómo conectar. pude medir los siguientes datos</p>
+</blockquote>
+<p>¡Entendido! Estás trabajando con un motor monofásico y quieres saber cómo conectarlo correctamente. Es un tema técnico importante.</p>
+<p>Por favor, compárteme los datos que has medido. La información que normalmente es útil para determinar la conexión correcta incluye:</p>
+<ol>
+<li><strong>Resistencia de los devanados</strong> (en ohmios) - entre los diferentes terminales</li>
+<li><strong>Cantidad de terminales</strong> que tiene el motor</li>
+<li><strong>Voltaje de operación</strong> (110V, 220V, etc.)</li>
+<li><strong>Identificación de cables</strong> (colores, números o marcas)</li>
+<li><strong>Tipo de motor</strong> (si lo sabes: con capacitor, sin capacitor, reversible, etc.)</li>
+</ol>
+<p>¿Tienes fotos del motor o del diagrama de la placa de características? Eso también puede ser muy útil.</p>
+<p>Espero tus mediciones para ayudarte con la conexión 🔧</p>
+<blockquote>
+<p>cable negro cable verde 31 ohms, cable negro cable rojo 87 ohms, cable negro cable blanco 36 ohms. cómo debería conectar la línea y el capacitor.</p>
+</blockquote>
+<p>Excelente, esos datos me ayudan mucho. Vamos a analizar:</p>
+<h2>Análisis de las Mediciones</h2>
+<p>| Medición | Resistencia | Interpretación |
+|----------|-------------|----------------|
+| Negro - Verde | 31 Ω | <strong>Devanado de trabajo</strong> (menor resistencia) |
+| Negro - Blanco | 36 Ω | <strong>Común/Neutro</strong> |
+| Negro - Rojo | 87 Ω | <strong>Devanado de arranque</strong> (mayor resistencia) |</p>
+<h2>Diagnóstico</h2>
+<p>En los motores monofásicos:</p>
+<ul>
+<li><strong>Devanado de trabajo</strong> = menor resistencia (mayor sección de wire, más corriente)</li>
+<li><strong>Devanado de arranque</strong> = mayor resistencia (menor sección de wire)</li>
+</ul>
+<p>Tu motor parece ser un <strong>motor de 3 hilos + capacitor</strong> con la siguiente configuración probable:</p>
+<ul>
+<li><strong>Negro</strong>: Común (punto común de los devanados)</li>
+<li><strong>Verde</strong>: Devanado de trabajo (principal)</li>
+<li><strong>Rojo</strong>: Devanado de arranque (auxiliar) - <strong>aquí va el capacitor</strong></li>
+<li><strong>Blanco</strong>: Posiblemente para cambio de voltaje 110V/220V</li>
+</ul>
+<h2>Conexión Sugerida</h2>
+<pre><code>        ┌─────────────────┐
+        │    CAPACITOR    │
+        └────────┬────────┘
+                 │
+    ═════════════╪═════════════
+    LINEA (Fase) │
+                 │
+    ─────────────┼─────────────
+    NEUTRO       │
+                 │
+        ┌────────┴────────┐
+        │     MOTOR       │
+        │                 │
+        │  ⚫ Negro ───────┼─── LÍNEA (Fase)
+        │  🟢 Verde ───────┼─── NEUTRO + CAPACITOR (un lado)
+        │  🔴 Rojo ────────┼─── CAPACITOR (otro lado)
+        │  ⚪ Blanco ──────┼─── (ver nota abajo)
+        └─────────────────┘
+</code></pre>
+<h2>⚠️ Antes de conectar, necesito que verifiques:</h2>
+<ol>
+<li>
+<p><strong>¿Cuál es el voltaje de tu red?</strong> (110V o 220V)</p>
+</li>
+<li>
+<p><strong>¿Hay continuidad entre Verde-Rojo, Verde-Blanco, Rojo-Blanco?</strong> Mide también estas combinaciones para confirmar el diagrama interno.</p>
+</li>
+<li>
+<p><strong>¿Tienes el valor del capacitor?</strong> (en microfaradios, ej: 250μF, 300μF, etc.)</p>
+</li>
+<li>
+<p><strong>¿El motor tiene placa de características?</strong> Si puedes compartir foto o datos de la placa.</p>
+</li>
+</ol>
+<p>Con esa información adicional te daré la conexión exacta y segura. 🔌</p>
+<ol>
+<li>la red tiene un voltaje de 220v ac. 2. si hay continuidad entre verde-rojo midiendo 120 ohms, también hay continuidad verde-blanco midiendo 66 ohms y también hay continuidad rojo-blanco midiendo 127 ohms. 3. el capacitor tiene un valor de 12 microfaradios. 4. la placa del motor está pintada, no se puede ver</li>
+</ol>
+<p>¡Perfecto! Con todas las mediciones puedo determinar exactamente la configuración interna del motor. Vamos a verificar:</p>
+<h2>Verificación de Consistencia</h2>
+<p>| Medición | Calculado | Medido | ✓ |
+|----------|-----------|--------|---|
+| Verde-Rojo | 31 + 87 = 118Ω | 120Ω | ✓ |
+| Verde-Blanco | 31 + 36 = 67Ω | 66Ω | ✓ |
+| Blanco-Rojo | 36 + 87 = 123Ω | 127Ω | ✓ |</p>
+<p>¡Todo coincide! Esto confirma que <strong>el cable NEGRO es el punto común (center tap)</strong>.</p>
+<hr />
+<h2>📐 Diagrama Interno del Motor</h2>
+<pre><code>        VERDE                 ROJO
+          │                     │
+          │    DEVANADO         │  DEVANADO
+      ┌───┴───┐ PRINCIPAL   ┌───┴───┐ AUXILIAR
+      │ 31Ω   │              │  87Ω  │
+      │       │              │       │
+      └───┬───┘              └───┬───┘
+          │                      │
+        NEGRO (COMÚN) ───────────┘
+          │
+      ┌───┴───┐
+      │ 36Ω   │  ← Segunda parte del devanado principal
+      │       │
+      └───┬───┘
+          │
+        BLANCO
+</code></pre>
+<hr />
+<h2>✅ Conexión para 220V AC</h2>
+<p>Para 220V, debes usar <strong>todo el devanado principal</strong> (Verde + Blanco = 66Ω total):</p>
+<pre><code>    ═════════════════════════════════════════════
+              LÍNEA 220V AC
+    ═════════════════════════════════════════════
+                    │           │
+                    │           │
+    ┌───────────────┘           └───────────────┐
+    │                                           │
+    │   🔴 ROJO ────[ CAPACITOR 12μF ]──── FASE │
+    │                                           │
+    │   🟢 VERDE ──────────────────────── FASE  │
+    │                                           │
+    │   ⚫ NEGRO ──────────────────── (NO USAR) │
+    │                                           │
+    │   ⚪ BLANCO ────────────────────── NEUTRO │
+    │                                           │
+    └───────────────────────────────────────────┘
+</code></pre>
+<h2>🔧 Resumen de Conexión</h2>
+<p>| Cable | Conectar a |
+|-------|------------|
+| 🟢 <strong>VERDE</strong> | Fase (vivo) |
+| ⚪ <strong>BLANCO</strong> | Neutro |
+| 🔴 <strong>ROJO</strong> | Un extremo del capacitor (12μF) |
+| ⚫ <strong>NEGRO</strong> | <strong>NO CONECTAR</strong> (center tap para 110V) |
+| Capacitor | Otro extremo a la <strong>FASE</strong> (junto con Verde) |</p>
+<hr />
+<h2>⚡ Sentido de Giro</h2>
+<ul>
+<li><strong>Para invertir el sentido de giro</strong>: Cambia el capacitor de la Fase al Neutro
+<ul>
+<li>Capacitor en Fase → Giro horario</li>
+<li>Capacitor en Neutro → Giro antihorario</li>
+</ul>
+</li>
+</ul>
+<hr />
+<h2>⚠️ Antes de Energizar</h2>
+<ol>
+<li><strong>Aísla el cable NEGRO</strong> con cinta aislante, no debe hacer contacto con nada</li>
+<li><strong>Verifica que no haya cortocircuitos</strong> entre los cables</li>
+<li><strong>Asegura todas las conexiones</strong> con conectores o terminales</li>
+<li><strong>Usa un capacitor de 12μF / 400V AC mínimo</strong> (o el voltaje que indique el capacitor original)</li>
+</ol>
+<p>¿Tienes dudas sobre alguna conexión? 🛠️</p>
+<blockquote>
+<p>ah mirá, no lo había pensado de esa forma, creía que el negro era común y el blanco trabajo y el verde con el capacitor a la linea</p>
+</blockquote>
+<p>¡Es una buena pregunta! Vamos a analizar tu interpretación y por qué descartamos esa opción.</p>
+<hr />
+<h2>🔍 ¿Por qué Negro NO es el común?</h2>
+<p>Si <strong>Negro fuera el común</strong>, entonces:</p>
+<p>| Cable | Resistencia al Negro | Interpretación |
+|-------|---------------------|----------------|
+| Verde | 31Ω | ¿Trabajo? (muy bajo) |
+| Blanco | 36Ω | ¿Trabajo? |
+| Rojo | 87Ω | Arranque ✓ |</p>
+<p>El problema es que tendrías <strong>DOS cables posibles para trabajo</strong> (Verde y Blanco), y en un motor monofásico simple solo hay un devanado de trabajo y uno de arranque.</p>
+<hr />
+<h2>🧮 La Clave: Verde-Blanco = 66Ω</h2>
+<p>Esta medición confirma que <strong>Verde y Blanco están en SERIE</strong>, con Negro en medio:</p>
+<pre><code>    VERDE ────[31Ω]──── NEGRO ────[36Ω]──── BLANCO
+                                │
+                          (center tap)
+</code></pre>
+<p>Si Negro fuera común, Verde y Blanco estarían en paralelo o serían independientes, y <strong>NO</strong> medirías 66Ω entre ellos.</p>
+<hr />
+<h2>❌ Tu Interpretación Original</h2>
+<pre><code>Negro = Común (Neutro)
+Blanco = Trabajo (a Fase)        → 36Ω ✓
+Verde = Con capacitor (Arranque) → 31Ω ✗ (muy bajo para arranque)
+Rojo = ¿?                        → 87Ω (¿qué hacer con este?)
+</code></pre>
+<p><strong>Problema</strong>: El devanado de arranque SIEMPRE tiene <strong>mayor resistencia</strong> que el de trabajo (porque tiene más espiras de wire más delgado). Verde con 31Ω no puede ser arranque.</p>
+<hr />
+<h2>✅ Interpretación Correcta</h2>
+<pre><code>                ROJO (87Ω) ← ARRANQUE (alta resistencia)
+                    │
+                    │
+    VERDE ──[31Ω]──NEGRO──[36Ω]──BLANCO
+             │              │
+             └──────────────┘
+                    │
+            TRABAJO (66Ω total para 220V)
+</code></pre>
+<p>| Cable | Función |
+|-------|---------|
+| 🟢 Verde | Extremo del devanado principal |
+| ⚪ Blanco | Otro extremo del devanado principal |
+| ⚫ Negro | <strong>Center tap</strong> (para 110V) - NO USAR en 220V |
+| 🔴 Rojo | Devanado de arranque (con capacitor) |</p>
+<hr />
+<h2>📌 Conexión Final Confirmada</h2>
+<pre><code>    ═════════════════════════════════════════
+              FASE 220V ═════════════════════
+    ═════════════════════════════════════════
+                    │
+                    │
+    ┌───────────────┼───────────────────────┐
+    │               │                       │
+    │   🔴 ROJO ────┴───[ CAPACITOR ]       │
+    │                                       │
+    │   🟢 VERDE ══════════════════ FASE    │
+    │                                       │
+    │   ⚫ NEGRO ════════════════ (AISLAR)  │
+    │                                       │
+    │   ⚪ BLANCO ═════════════════ NEUTRO  │
+    │                                       │
+    └───────────────────────────────────────┘
+</code></pre>
+<hr />
+<h2>📝 Resumen</h2>
+<p>| Conexión | Cable |
+|----------|-------|
+| Fase directo | 🟢 Verde |
+| Neutro | ⚪ Blanco |
+| Capacitor (otro lado a Fase) | 🔴 Rojo |
+| Aislar con cinta | ⚫ Negro |</p>
+<p>El <strong>devanado completo de trabajo</strong> para 220V es Verde-Blanco (66Ω), y el <strong>devanado de arranque</strong> es Rojo-Negro (87Ω).</p>
+
+
+<h3>Resumen</h3>
+<p>
+Se reemplazo el motor, preguntamos a chat punto z punto a i como conectar el motor, tenia 4 cables y era confuso. Medimos con pinza amperometrica el amper para saber si estaba bien conectado porque el motor recalentaba. Puso primero un capacitor de 10 microfaradios despues uno de 30 microfaradios, creemos que la cantidad de microfaradios correcta es de 20 o 15 microfaradios, pero la medicion de amper nos daba 0 coma 7 a velocidad maxima.
+</p>
+
 <a href="https://archive.org/download/2026-03-30-cambiando-motor-images/IMG_20260219_093255281.jpg"><img src="https://archive.org/download/2026-03-30-cambiando-motor-images/IMG_20260219_093255281_thumb.jpg"></a>
 <a href="https://archive.org/download/2026-03-30-cambiando-motor-images/IMG_20260219_093333169.jpg"><img src="https://archive.org/download/2026-03-30-cambiando-motor-images/IMG_20260219_093333169_thumb.jpg"></a>
 <a href="https://archive.org/download/2026-03-30-cambiando-motor-images/IMG_20260219_093933141.jpg"><img src="https://archive.org/download/2026-03-30-cambiando-motor-images/IMG_20260219_093933141_thumb.jpg"></a>
@@ -156,10 +391,6 @@
 <a href="https://archive.org/download/2026-03-30-cambiando-motor-images/IMG_20260330_094651316.jpg"><img src="https://archive.org/download/2026-03-30-cambiando-motor-images/IMG_20260330_094651316_thumb.jpg"></a>
 <a href="https://archive.org/download/2026-03-30-cambiando-motor-images/IMG_20260330_094655147.jpg"><img src="https://archive.org/download/2026-03-30-cambiando-motor-images/IMG_20260330_094655147_thumb.jpg"></a>
 <hr>
-<h3>Resumen</h3>
-<p>
-Se reemplazo el motor, preguntamos a chat punto z punto a i como conectar el motor, tenia 4 cables y era confuso. Medimos con pinza amperometrica el amper para saber si estaba bien conectado porque el motor recalentaba. Puso primero un capacitor de 10 microfaradios despues uno de 30 microfaradios, creemos que la cantidad de microfaradios correcta es de 20 o 15 microfaradios, pero la medicion de amper nos daba 0 coma 7 a velocidad maxima.
-</p>
   </article>
   <hr>
   <a href=../index.html>← Inicio</a>
