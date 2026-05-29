@@ -1,9 +1,13 @@
+html {
+    background-color: #eee;
+}
 body {
   /* Esto es para centrar el contenido por si la pantalla es muy grande. */
   max-width: 900px;
-  margin: auto;
+  margin: 50px auto;
 
   background: #fefefe;
+  border: 2px solid black;
   color: #222;
 
   /* Diferencia de altura entre cada renglón. */
@@ -37,3 +41,6 @@ a:hover {
   text-decoration: underline;
 }
 
+li {
+    margin: 20px;
+}
