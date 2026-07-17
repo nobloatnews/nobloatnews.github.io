@@ -28,6 +28,7 @@ if [ $# -lt 3 ];
           echo "sed -E '/^[0-9]+$|^$/d; /^[0-9]{2}:/d' video.en.srt > subtitles.txt"
 	  echo "Uso: $0 <nombre-archivo> \"<titulo con espacios>\" <ruta del directorio de imagenes (opcional)> <ruta entera del directorio de audio.m4a(opcional)> \"subir_audio(opcional): si pones 1 sube el audio\" \"ruta de archivo de texto entero para generar audio(opcional)\" "
 	  echo "Si pones el texto al final, el video se creará con espeak generado con el texto y va a ignorar el archivo de audio."
+      echo "El titulo del video de youtube no puede ser muy largo OJO!!!!!!!!!!!!!!!!"
     exit;
 fi
 
