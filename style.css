@@ -49,3 +49,40 @@ a:hover {
 li {
     margin: 20px;
 }
+
+
+/* ============================================================
+   Agregar este bloque UNA SOLA VEZ al final de tu style.css
+   (el mismo style.css que ya usan todas tus paginas)
+   ============================================================ */
+
+#lightbox-overlay {
+  display: none;
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.95);
+  z-index: 9999;
+  justify-content: center;
+  align-items: center;
+  cursor: zoom-out;
+}
+#lightbox-overlay.active {
+  display: flex;
+}
+#lightbox-overlay img {
+  max-width: 95%;
+  max-height: 95%;
+  object-fit: contain;
+}
+#lightbox-close {
+  position: absolute;
+  top: 16px;
+  right: 24px;
+  font-size: 42px;
+  color: #fff;
+  cursor: pointer;
+  line-height: 1;
+}
+
+
+

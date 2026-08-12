@@ -1,0 +1,304 @@
+# Este archivo crea un video con un texto pero no sigue el texto en
+# coordinación con las imágenes.
+#!/bin/bash
+set -euo pipefail
+
+echo "se necesita el comando ia (internet archive)".
+
+for cmd in ffmpeg ffprobe yt-dlp espeak-ng slider gen.sh fzf; do
+  # ia (internet archive) debe estar dentro de venv python
+  command -v "$cmd" >/dev/null || { echo "Falta $cmd"; exit 1; }
+done
+
+# Si pusiste texto no subas el archivo de audio
+
+# 1 sirve para solo generar el video sin subirlo
+prueba=0
+
+((prueba==1)) && echo "MODO PRUEBA ACTIVADO!"
+
+actual_dir=$PWD;
+
+# ---------------------------------------------------------------------------
+# MODO INTERACTIVO (fzf): se activa si corrés el script SIN argumentos.
+# Elegís la carpeta de imágenes con fzf, detecta automáticamente el archivo
+# "script" (texto para espeak) o busca audios reales dentro de la carpeta,
+# y arma los parámetros posicionales solo. El resto del script sigue igual.
+# ---------------------------------------------------------------------------
+slugify() {
+  echo "$1" \
+    | iconv -t ascii//TRANSLIT 2>/dev/null \
+    | tr '[:upper:]' '[:lower:]' \
+    | sed -E 's/[^a-z0-9]+/-/g; s/^-+//; s/-+$//'
+}
+
+if [ $# -eq 0 ]; then
+  base_dir="$HOME/samba"   # <-- cambiá esto si tu carpeta base es otra
+  dummy_audio_fijo="$HOME/audios/hola.m4a"   # audio corto de prueba que ya sabés que funciona
+
+  if [ ! -d "$base_dir" ]; then
+    echo "No existe $base_dir. Editá la variable base_dir en el script."
+    exit 1
+  fi
+
+  img_dir=$(find "$base_dir" -mindepth 1 -maxdepth 1 -type d 2>/dev/null | sort | fzf --prompt="Carpeta de imágenes> ") || true
+  if [ -z "${img_dir:-}" ]; then
+    echo "No se eligió ninguna carpeta. Abortando."
+    exit 1
+  fi
+
+  default_slug=$(slugify "$(basename "$img_dir")")
+  read -e -p "Nombre de archivo/slug [$default_slug]: " nombre_archivo
+  nombre_archivo=${nombre_archivo:-$default_slug}
+  nombre_archivo=$(slugify "$nombre_archivo")
+
+  read -e -p "Título (con espacios) para YouTube y el post: " titulo
+  if [ -z "$titulo" ]; then
+    echo "El título no puede estar vacío."
+    exit 1
+  fi
+
+  set -- "$nombre_archivo" "$titulo" "$img_dir"
+
+  text_file="$img_dir/script"
+  if [ -f "$text_file" ]; then
+    echo "Encontré '$text_file' -> se va a generar el audio con espeak a partir de ese texto."
+    if [ -f "$dummy_audio_fijo" ]; then
+      dummy_audio="$dummy_audio_fijo"
+    else
+      dummy_audio="/tmp/${nombre_archivo}_dummy.tmp"
+      : > "$dummy_audio"   # archivo vacío, solo para pasar la validación de existencia
+    fi
+    set -- "$@" "$dummy_audio" 0 "$text_file"
+  else
+    audio_file=""
+    mapfile -t audios_en_carpeta < <(find "$img_dir" -maxdepth 1 -type f \( -iname '*.m4a' -o -iname '*.mp3' -o -iname '*.wav' \) 2>/dev/null | sort)
+
+    if [ "${#audios_en_carpeta[@]}" -gt 0 ]; then
+      audio_file=$(printf '%s\n' "${audios_en_carpeta[@]}" | fzf --prompt="Audio encontrado en la carpeta (Esc = sin audio)> ") || true
+    fi
+
+    if [ -z "$audio_file" ]; then
+      read -e -p "Ruta completa de un audio real (Enter = sin audio): " audio_file
+    fi
+
+    if [ -n "$audio_file" ]; then
+      if [ ! -f "$audio_file" ]; then
+        echo "Ese audio no existe: $audio_file"
+        exit 1
+      fi
+      read -p "¿Subir este audio a YouTube/Archive? [s/N]: " subir
+      if [[ "$subir" =~ ^[sS] ]]; then
+        set -- "$@" "$audio_file" 1
+      else
+        set -- "$@" "$audio_file" 0
+      fi
+    else
+      # Sin audio real: el modo "solo imágenes" (3 args, sin -a) rompe slider/ffprobe.
+      # Usamos el audio dummy fijo (corto, ya probado) como si fuera audio real,
+      # así entra por la rama de 4 args en vez de la rama rota sin -a.
+      if [ -f "$dummy_audio_fijo" ]; then
+        echo "No hay audio real. Uso el dummy de siempre ($dummy_audio_fijo)."
+        set -- "$@" "$dummy_audio_fijo" 0
+      else
+        echo "No hay audio real ni $dummy_audio_fijo. Genero un silencio como último recurso."
+        cantidad_imgs=$(find "$img_dir" -maxdepth 1 -iname '*.jpg' | wc -l)
+        duracion=$(( cantidad_imgs * 15 ))
+        [ "$duracion" -lt 15 ] && duracion=15
+        silent_audio="/tmp/${nombre_archivo}_silencio.wav"
+        ffmpeg -y -f lavfi -i anullsrc=channel_layout=mono:sample_rate=44100 -t "$duracion" -c:a pcm_s16le "$silent_audio" >/dev/null 2>&1
+        set -- "$@" "$silent_audio" 0
+      fi
+    fi
+  fi
+
+  echo "-----------------------------------------"
+  echo "Slug:        $1"
+  echo "Título:      $2"
+  echo "Imágenes:    $3"
+  (($# >= 4)) && echo "Audio:       $4"
+  (($# >= 5)) && echo "Subir audio: $5"
+  (($# >= 6)) && echo "Texto:       $6"
+  echo "-----------------------------------------"
+  read -p "Enter para continuar, Ctrl+C para cancelar..."
+fi
+# ------------------------- FIN MODO INTERACTIVO -----------------------------
+
+if [ $# -lt 3 ];
+  then
+          echo "Consejo: si tenes un audio, concatená el audio con una imagen y subilo a YouTube descarga los subtitulos y pasalos a ChatGPT pedile un resumen y luego agregalo como texto entero para generar el audio, eso se hace con el script youtube.fish";
+	  echo "Si queres que el archivo de audio sea por defecto no uses el 5to parametro."
+          echo "Con los siguientes comandos:"
+          echo "yt-dlp --ignore-config --write-subs --write-auto-sub --sub-lang es --sub-format \"srt\" --skip-download https://www.youtube.com/watch?v=VIDEO_ID"
+          echo "sed -E '/^[0-9]+$|^$/d; /^[0-9]{2}:/d' video.en.srt > subtitles.txt"
+	  echo "Uso: $0 <nombre-archivo> \"<titulo con espacios>\" <ruta del directorio de imagenes (opcional)> <ruta entera del directorio de audio.m4a(opcional)> \"subir_audio(opcional): si pones 1 sube el audio\" \"ruta de archivo de texto entero para generar audio(opcional)\" "
+	  echo "Si pones el texto al final, el video se creará con espeak generado con el texto y va a ignorar el archivo de audio."
+      echo "El titulo del video de youtube no puede ser muy largo OJO!!!!!!!!!!!!!!!!"
+      echo "Tip: corré '$0' sin argumentos para el modo interactivo con fzf."
+    exit;
+fi
+
+[ $# -ge 3 ] && [ ! -d "$3" ] && echo "Directorio de imágenes inválido" && exit 1
+[ $# -ge 4 ] && [ ! -f "$4" ] && echo "Audio no existe" && exit 1
+
+
+
+year=$(date +%Y)
+month=$(date +%m)
+name_month=$(date +%B)
+day=$(date +%d)
+
+
+tag_name="$year-$month-$day-$1"
+
+ # 1. Arreglar el script si el audio dura menos que las imágenes porque genera valor negativo (el audio debe durar lo mismo que el video) ----->> NO. Esto se soluciona cambiando el totseconds. X
+# El slidier requiere ese ligero cambio sino te genera valores negativos. X
+# 2. Subir video automáticamente el audio a YouTube y a Archive. No se puede subir audios a youtube tendras que concatenarlos con una imágen. X
+# ia upload $year-$month-$dayaudio file.m4a X
+# youtube-upload ... X
+# 3. Crear un artículo automáticamente basado en imágenes. X
+# 4. Crear un audio con espeak que tenga la misma duración que el video (contá cuántas imágenes tenes y multiplicá por cada segundo cada imágen). (No hace falta). X
+# echo "texto" | espeak-ng -v es -w file.wav X
+# cp gen.sh /usr/bin && chmod +x /usr/bin/gen.sh X
+# ls *.jpg | sort | gen.sh > video X
+# modificá totseconds en /usr/bin/slider X
+# slider -i video -a audio.wav X
+# 5. Enlazá las URLs de archive automáticamente X
+# 6. Hacer script para juntar videos (no imagenes) con ffmpeg. X
+# 7. Subtitular audios subilos a youtube y descargalos con yt-dlp.
+# 8. Pasar los subtitulos a un llm o a chatgpt para que haga un resumen.
+# 9. Generar un archivo de audio con los subtitulos de chatgpt.
+# 10. Subir video automáticamente el video a YouTube y a Archive. X
+# source internetarchive/bin/activate && ia upload $year-$month-$day-$1 /tmp/video_generado.mp4 X
+# source $HOME/youtube-upload/bin/activate && $HOME/youtube-upload/youtube-upload/bin/youtube-upload --title="$1" --default-language="es" --privacy="unlisted" --embeddable=True /tmp/video_generado.mp4 X
+#### Video subido a  Archive.org:
+# <video width="640" height="480" controls>
+#   <source src="path/to/video.mp4" type="video/mp4">
+#   Your browser does not support the video tag.
+# </video>
+# 
+# #### Video subido a YouTube:
+# ```html
+# <iframe width="560" height="315" src="https://www.youtube.com/embed/dQw4w9WgXcQ" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
+
+echo "<!DOCTYPE html>" > "$actual_dir/posts/$tag_name.html"
+echo "<html lang=\"es\">" >> "$actual_dir/posts/$tag_name.html"
+echo "<head>" >> "$actual_dir/posts/$tag_name.html"
+echo "  <meta charset=\"utf-8\">" >> "$actual_dir/posts/$tag_name.html"
+echo "  <title>$2</title>" >> "$actual_dir/posts/$tag_name.html"
+echo "  <link rel=\"stylesheet\" href=\"../style.css\">" >> "$actual_dir/posts/$tag_name.html"
+echo "  <base target=\"_blank\">" >> "$actual_dir/posts/$tag_name.html"
+echo "  <meta name=\"viewport\" content=\"width=device-width, initial-scale=1\">" >> "$actual_dir/posts/$tag_name.html"
+echo "</head>" >> "$actual_dir/posts/$tag_name.html"
+echo "<body>" >> "$actual_dir/posts/$tag_name.html"
+echo "  <center>" >> "$actual_dir/posts/$tag_name.html"
+echo "  <header><a href=\"../index.html\">← Inicio</a></header>" >> "$actual_dir/posts/$tag_name.html"
+echo "  <hr>" >> "$actual_dir/posts/$tag_name.html"
+echo "  <article>" >> "$actual_dir/posts/$tag_name.html"
+echo "    <h1>$2</h1>" >> "$actual_dir/posts/$tag_name.html"
+echo "    <p>Artículo publicado por: Andrés Imlauer.</p>" >> "$actual_dir/posts/$tag_name.html"
+echo "    <time datetime=\"$year-$month-$day\">$name_month $day, $year</time>" >> "$actual_dir/posts/$tag_name.html"
+
+
+
+
+
+
+
+
+
+#cp posts/2025-10-hola.html posts/$tag_name.html
+sed -i "/<ul>/a\        <li><a href=\"posts/$tag_name.html\">$2</a> – $day $name_month $year</li>" index.html
+#ls -1 $3 | sed -e "s|^|<img src=\"https://archive.org/download/tag_name/|" | sed -e "s|$|_thumb.jpg\">|" | tee -a "posts/$year-$month-$day-$1.html"
+
+
+## Si pusiste texto como audio. Si queres que el archivo de audio sea por defecto no uses el 6to parametro.
+
+(($# == 6)) && echo "Generando archivo de audio a partir del texto..." && espeak-ng -f "$6" -m -v es -w "/tmp/$tag_name.wav"
+
+#(($# == 6)) && echo "Generando archivo de audio a partir del texto..." && espeak-ng -s 120 -p 30 -f "$6" -m -v es -w "/tmp/$tag_name.wav" && python generar_srt.py "$6" 120 30 && mv subtitulos.srt "/tmp/$tag_name.srt" && rm -rf *.wav
+
+echo "Listo."
+
+#### GENERAMOS EL VIDEO, si el audio es mas largo que las imagenes tendras que cambiarlo.
+#longitud_audio=$(ffprobe -v error -show_entries format=duration -of default=noprint_wrappers=1:nokey=1 $4)
+#cantidad_imagenes=$((ls -1 $3 | wc -l))
+
+echo "Generando video..."
+
+# Si es igual a 6 el video será con el audio-texto generado por espeak.
+(($# == 6)) && ls "$3"/*.jpg | sort | gen.sh > "/tmp/$tag_name" && cd /tmp && slider -i "$tag_name" -a "$tag_name.wav" -o "/tmp/$tag_name.mp4"
+
+# Si es igual a 5 o 4 el video debería ser sin el audio-texto generado por espeak pero con el archivo de audio.
+(($# == 5)) && ls "$3"/*.jpg | sort | gen.sh > "/tmp/$tag_name" && cd /tmp && slider -i "$tag_name" -a "$4" -o "/tmp/$tag_name.mp4"
+(($# == 4)) && ls "$3"/*.jpg | sort | gen.sh > "/tmp/$tag_name" && cd /tmp && slider -i "$tag_name" -a "$4" -o "/tmp/$tag_name.mp4"
+
+# Si es igual a 3 el video debería ser solo imagenes sin audios.
+(($# == 3)) && ls "$3"/*.jpg | sort | gen.sh > "/tmp/$tag_name" && cd /tmp && slider -i "$tag_name" -o "/tmp/$tag_name.mp4"
+
+echo "Listo."
+
+# Quemar subtítulos si existe el archivo SRT
+if [ -f "/tmp/$tag_name.srt" ]; then
+    echo "Quemando subtítulos en el video..."
+    ffmpeg -y -i "/tmp/$tag_name.mp4" -vf "subtitles=/tmp/$tag_name.srt:force_style='FontName=Arial,FontSize=24,PrimaryColour=&HFFFFFF&,OutlineColour=&H000000&,Outline=2,Shadow=1,MarginV=20'" -c:a copy "/tmp/${tag_name}_con_subs.mp4"
+    mv "/tmp/${tag_name}_con_subs.mp4" "/tmp/$tag_name.mp4"
+    echo "Subtítulos quemados correctamente."
+fi
+
+#ffmpeg -i "/tmp/$tag_name.mp4" -filter_complex "[0:v]setpts=0.5*PTS[v];[0:a]atempo=2.0[a]" -map "[v]" -map "[a]" "/tmp/${tag_name}_x2.mp4"
+#mv "/tmp/${tag_name}_x2.mp4" "/tmp/$tag_name.mp4"
+
+((prueba == 1)) && echo "Modo prueba. No subire el video." && exit;
+
+cd $actual_dir;
+
+(($# > 2)) && echo "Subimos video a YouTube" && source $HOME/youtube-upload/bin/activate && youtube_id=$($HOME/youtube-upload/youtube-upload/bin/youtube-upload --title="$2" --privacy="unlisted" --embeddable=True "/tmp/$tag_name.mp4" | tail -1) && echo "Cargo video de YouTube en el html generado (iframe tag)." && echo "<h3><a href=\"https://www.youtube.com/embed/$youtube_id\">¡¡CLICK PARA VER VIDEO DE LAS FOTOS EN YOUTUBE (con explicación)!!</a></h3>" >> "posts/$tag_name.html"
+
+(($# > 2)) && echo "Subimos video a Archive.org" && source $HOME/internetarchive/bin/activate && ia upload "$tag_name-video" "/tmp/$tag_name.mp4" && echo "Cargo video de Archive en el html generado (video tag)." && echo "<h3><a href=\"https://archive.org/download/$tag_name-video/$tag_name.mp4\">¡¡CLICK PARA VER VIDEO DE LAS FOTOS EN ARCHIVE (con explicación)!!</a></h3>" >> "posts/$tag_name.html"; 
+
+
+# Si pusiste el 5to argumento como 1 entonces subimos el pseudoaudio
+(($# > 4)) && (($5 == 1)) && echo "Subimos el audio a Archive." && source $HOME/internetarchive/bin/activate && ia upload "$year-$month-$day-$1audio" "$4" && echo "<h3><a href=\"https://archive.org/download/$year-$month-$day-$1audio/$4\">¡¡¡Escuchar el Audio del suceso!!!.</a></h3>" >> "posts/$tag_name.html" ; 
+
+
+echo "OJO: No se puede subir audio a YouTube lo concatenaré con una imagen."
+
+(($# > 4)) && (($5 == 1)) && echo "Subimos el audio a YouTube." && echo "Generamos thumbnail para youtube" && (cd /tmp && thumbnailg "$2" "/tmp/$tag_name.png") && echo "Creando un video a partir del audio..." && ffmpeg -i "/tmp/$tag_name.png" -i "$4" -c:v libx264 -tune stillimage -c:a copy /tmp/$tag_name.mp4 && source $HOME/youtube-upload/bin/activate && youtube_id=$($HOME/youtube-upload/youtube-upload/bin/youtube-upload --title="$2" --privacy="unlisted" --embeddable=True "/tmp/$tag_name.mp4" | tail -1) && echo "Cargo video del audio de YOUTUBE en el html generado (a tag)." && echo "<h3><a href=\"https://www.youtube.com/embed/$youtube_id\">¡¡CLICK PARA ESCUCHAR EL AUDIO EN YOUTUBE!!</a></h3>" >> "posts/$tag_name.html"
+
+
+echo "Cargo imagenes de archive en el html generado."
+echo "<hr>" >> "posts/$tag_name.html"
+
+# Descomenta todo esto para subir imagenes una por una a archive e insertarlas en el html.
+
+echo "Subo imagenes a Archive"
+(($# > 2)) && cd "$3" && source $HOME/internetarchive/bin/activate && ia upload "$tag_name-images" *
+
+cd $actual_dir;
+cantidad_imagenes=$(ls -1 "$3" | wc -l)
+
+(($# > 2)) && ((cantidad_imagenes >= 10)) && echo "<h3><a href=\"https://archive.org/details/$tag_name-images/\">¡¡¡VER LAS $cantidad_imagenes DE FOTOS EN ARCHIVE!!!!</a></h3>" >> "$actual_dir/posts/$tag_name.html" ; 
+
+
+(($# > 2)) && cd "$3" && for i in *.jpg; do echo "<a href=\"https://archive.org/download/$tag_name-images/$i\"><img src=\"https://archive.org/download/$tag_name-images/${i%.*}_thumb.jpg\"></a>" >> "$actual_dir/posts/$tag_name.html" ; done
+
+
+
+cd $actual_dir;
+
+echo "<hr>" >> "posts/$tag_name.html"
+echo "<h3>Resumen</h3>" >> "posts/$tag_name.html"
+echo "<p>"  >> "posts/$tag_name.html"
+cat "$6" >> "posts/$tag_name.html"
+echo "</p>" >> "posts/$tag_name.html"
+
+echo "  </article>" >> "posts/$tag_name.html"
+echo "  <hr>" >> "posts/$tag_name.html"
+echo "  <a href="../index.html">← Inicio</a>" >> "posts/$tag_name.html"
+echo "  </center>" >> "posts/$tag_name.html"
+echo "</body>" >> "posts/$tag_name.html"
+echo "</html>" >> "posts/$tag_name.html"
+
+
+git add . && git commit -m "posts/$year-$month-$day-$1.html" && git push

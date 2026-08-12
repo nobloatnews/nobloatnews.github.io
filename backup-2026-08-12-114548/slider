@@ -133,9 +133,9 @@ duration ${endtime:-2}
 file '$base'"
 } > "$prepfile"
 if [ -n "${audio+x}" ]; then
-	ffmpeg -hide_banner -y -f concat -safe 0 -i "$prepfile" -i "$audio" -c:a aac -fps_mode cfr -c:v libx264 -pix_fmt yuv420p "$outfile"
+	ffmpeg -hide_banner -y -f concat -safe 0 -i "$prepfile" -i "$audio" -c:a aac -vsync cfr -c:v libx264 -pix_fmt yuv420p "$outfile"
 else
-	ffmpeg -hide_banner -y -f concat -safe 0 -i "$prepfile" -fps_mode cfr -c:v libx264 -pix_fmt yuv420p "$outfile"
+	ffmpeg -hide_banner -y -f concat -safe 0 -i "$prepfile" -vsync cfr -c:v libx264 -pix_fmt yuv420p "$outfile"
 fi
 
 # Might also try:
