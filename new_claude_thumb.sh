@@ -34,7 +34,7 @@ slugify() {
 }
 
 if [ $# -eq 0 ]; then
-  base_dir="$HOME/samba"   # <-- cambiá esto si tu carpeta base es otra
+  base_dir="/mnt/linux2/samba"   # <-- cambiá esto si tu carpeta base es otra
   dummy_audio_fijo="$HOME/audios/hola.m4a"   # audio corto de prueba que ya sabés que funciona
 
   if [ ! -d "$base_dir" ]; then
@@ -227,15 +227,33 @@ echo "Listo."
 
 echo "Generando video..."
 
+# Música para que dure exactamente lo que dura el video (imagenes * 2 segundos):
+# la repito si es corta o la recorto si es larga.
+if [ $# -ge 4 ] && [ -f "$4" ]; then
+  cantidad_imgs=$(find "$3" -type f -iname '*.jpg' | wc -l)
+  duracion_video=$((cantidad_imgs * 2))
+  duracion_audio=$(ffprobe -v error -show_entries format=duration -of default=noprint_wrappers=1:nokey=1 "$4" 2>/dev/null | cut -d. -f1)
+  if [ -n "$duracion_audio" ] && [ "$duracion_audio" -ne "$duracion_video" ]; then
+    [ "$duracion_audio" -lt "$duracion_video" ] && decision="repito" || decision="recorto"
+    echo "Música de ${duracion_audio}s -> la $decision hasta la duración del video (${duracion_video}s)."
+    ffmpeg -y -stream_loop -1 -i "$4" -map 0:a -t "$duracion_video" -c:a aac -b:a 128k "/tmp/${tag_name}_loop.m4a" >/dev/null 2>&1
+    audio_video="/tmp/${tag_name}_loop.m4a"
+  else
+    audio_video="$4"
+  fi
+else
+  audio_video=""
+fi
+
 # Si es igual a 6 el video será con el audio-texto generado por espeak.
-(($# == 6)) && ls "$3"/*.jpg | sort | gen.sh > "/tmp/$tag_name" && cd /tmp && slider -i "$tag_name" -a "$tag_name.wav" -o "/tmp/$tag_name.mp4"
+(($# == 6)) && find "$3" -type f -iname '*.jpg' | sort | gen.sh > "/tmp/$tag_name" && cd /tmp && slider -i "$tag_name" -a "$tag_name.wav" -o "/tmp/$tag_name.mp4"
 
 # Si es igual a 5 o 4 el video debería ser sin el audio-texto generado por espeak pero con el archivo de audio.
-(($# == 5)) && ls "$3"/*.jpg | sort | gen.sh > "/tmp/$tag_name" && cd /tmp && slider -i "$tag_name" -a "$4" -o "/tmp/$tag_name.mp4"
-(($# == 4)) && ls "$3"/*.jpg | sort | gen.sh > "/tmp/$tag_name" && cd /tmp && slider -i "$tag_name" -a "$4" -o "/tmp/$tag_name.mp4"
+(($# == 5)) && find "$3" -type f -iname '*.jpg' | sort | gen.sh > "/tmp/$tag_name" && cd /tmp && slider -i "$tag_name" -a "${audio_video:-$4}" -o "/tmp/$tag_name.mp4"
+(($# == 4)) && find "$3" -type f -iname '*.jpg' | sort | gen.sh > "/tmp/$tag_name" && cd /tmp && slider -i "$tag_name" -a "${audio_video:-$4}" -o "/tmp/$tag_name.mp4"
 
 # Si es igual a 3 el video debería ser solo imagenes sin audios.
-(($# == 3)) && ls "$3"/*.jpg | sort | gen.sh > "/tmp/$tag_name" && cd /tmp && slider -i "$tag_name" -o "/tmp/$tag_name.mp4"
+(($# == 3)) && find "$3" -type f -iname '*.jpg' | sort | gen.sh > "/tmp/$tag_name" && cd /tmp && slider -i "$tag_name" -o "/tmp/$tag_name.mp4"
 
 echo "Listo."
 
@@ -277,11 +295,7 @@ echo "Genero thumbnails de las imágenes..."
 if (($# > 2)); then
   (
     cd "$3"
-    for img in *.jpg; do
-      [ -e "$img" ] || continue
-      case "$img" in
-        *_thumb.jpg) continue ;;   # no le genero thumbnail a un thumbnail
-      esac
+    find . -type f -iname '*.jpg' -not -iname '*_thumb.jpg' | sort | while read -r img; do
       thumb="${img%.*}_thumb.jpg"
       [ -f "$thumb" ] && continue  # ya existe, no lo piso
       magick "$img" -resize "${thumb_ancho}x${thumb_ancho}" -quality 85 "$thumb"
@@ -293,12 +307,12 @@ echo "Subo imagenes a Archive"
 (($# > 2)) && cd "$3" && source $HOME/internetarchive/bin/activate && ia upload "$tag_name-images" *
 
 cd $actual_dir;
-cantidad_imagenes=$(ls -1 "$3" | wc -l)
+cantidad_imagenes=$(find "$3" -type f -iname '*.jpg' | wc -l)
 
 (($# > 2)) && ((cantidad_imagenes >= 10)) && echo "<h3><a href=\"https://archive.org/details/$tag_name-images/\">¡¡¡VER LAS $cantidad_imagenes DE FOTOS EN ARCHIVE!!!!</a></h3>" >> "$actual_dir/posts/$tag_name.html" ; 
 
 
-(($# > 2)) && cd "$3" && for i in *.jpg; do echo "<a href=\"https://archive.org/download/$tag_name-images/$i\"><img src=\"https://archive.org/download/$tag_name-images/${i%.*}_thumb.jpg\"></a>" >> "$actual_dir/posts/$tag_name.html" ; done
+(($# > 2)) && cd "$3" && find . -type f -iname '*.jpg' -not -iname '*_thumb.jpg' | sort | while read -r i; do i="${i#./}"; echo "<a href=\"https://archive.org/download/$tag_name-images/$i\"><img src=\"https://archive.org/download/$tag_name-images/${i%.*}_thumb.jpg\"></a>" >> "$actual_dir/posts/$tag_name.html" ; done
 
 
 
@@ -306,9 +320,9 @@ cd $actual_dir;
 
 echo "<hr>" >> "posts/$tag_name.html"
 echo "<h3>Resumen</h3>" >> "posts/$tag_name.html"
-echo "<p>"  >> "posts/$tag_name.html"
-cat "$6" >> "posts/$tag_name.html"
-echo "</p>" >> "posts/$tag_name.html"
+#echo "<p>"  >> "posts/$tag_name.html"
+#cat "$6" >> "posts/$tag_name.html"
+#echo "</p>" >> "posts/$tag_name.html"
 
 echo "  </article>" >> "posts/$tag_name.html"
 echo "  <hr>" >> "posts/$tag_name.html"
