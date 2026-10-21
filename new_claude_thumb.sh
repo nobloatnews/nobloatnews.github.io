@@ -246,7 +246,30 @@ else
 fi
 
 # Si es igual a 6 el video será con el audio-texto generado por espeak.
-(($# == 6)) && find "$3" -type f -iname '*.jpg' | sort | gen.sh > "/tmp/$tag_name" && cd /tmp && slider -i "$tag_name" -a "$tag_name.wav" -o "/tmp/$tag_name.mp4"
+# Si además se pasó una música (4to parámetro) se mezcla de fondo con la narración,
+# porque si no el texto del 6to parámetro reemplaza toda la pista de audio.
+audio_narrado=""
+if [ $# -eq 6 ] && [ -f "$4" ] && [ -f "/tmp/$tag_name.wav" ]; then
+  echo "Mezclo la música con la narración..."
+  # La mezcla dura lo que el video, o lo que la narración si es más larga.
+  n_imgs_mix=$(find "$3" -type f -iname '*.jpg' | wc -l)
+  dur_vid_mix=$((n_imgs_mix * 2))
+  dur_nar_mix=$(ffprobe -v error -show_entries format=duration -of default=nw=1:nk=1 "/tmp/$tag_name.wav" 2>/dev/null | cut -d. -f1)
+  dur_nar_mix=${dur_nar_mix:-0}
+  dur_mix=$dur_vid_mix
+  [ "$dur_nar_mix" -gt "$dur_mix" ] && dur_mix=$dur_nar_mix
+  ffmpeg -y -i "/tmp/$tag_name.wav" -stream_loop -1 -i "$4" \
+    -filter_complex "[1:a]volume=0.18,afade=t=in:st=0:d=3[m];[0:a][m]amix=inputs=2:duration=longest:dropout_transition=0:normalize=0[a]" \
+    -map "[a]" -t "$dur_mix" -c:a aac -b:a 128k "/tmp/${tag_name}_narrado.m4a" >/dev/null 2>&1
+  if [ -s "/tmp/${tag_name}_narrado.m4a" ]; then
+    audio_narrado="/tmp/${tag_name}_narrado.m4a"
+    echo "Narración + música listas: $(ffprobe -v error -show_entries format=duration -of default=nw=1:nk=1 "$audio_narrado" 2>/dev/null)s"
+  else
+    echo "No se pudo mezclar la música, se usa solo la narración."
+  fi
+fi
+
+(($# == 6)) && find "$3" -type f -iname '*.jpg' | sort | gen.sh > "/tmp/$tag_name" && cd /tmp && slider -i "$tag_name" -a "${audio_narrado:-$tag_name.wav}" -o "/tmp/$tag_name.mp4"
 
 # Si es igual a 5 o 4 el video debería ser sin el audio-texto generado por espeak pero con el archivo de audio.
 (($# == 5)) && find "$3" -type f -iname '*.jpg' | sort | gen.sh > "/tmp/$tag_name" && cd /tmp && slider -i "$tag_name" -a "${audio_video:-$4}" -o "/tmp/$tag_name.mp4"
