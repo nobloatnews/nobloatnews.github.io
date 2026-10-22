@@ -152,6 +152,17 @@ day=$(date +%d)
 
 tag_name="$year-$month-$day-$1"
 
+# Item de Archive donde se suben las fotos. Por defecto es "$tag_name-images",
+# pero se puede cambiar con la variable de entorno ITEM_FOTOS (por ejemplo si
+# ese item quedo trabado o ya existe con fotos viejas).
+item_fotos="${ITEM_FOTOS:-$tag_name-images}"
+
+# Lista las fotos .jpg de una carpeta ORDENADAS POR FECHA (EXIF, o la del nombre
+# del archivo, o la de modificacion). No incluye los *_thumb.jpg.
+listar_fotos() {
+  python3 "$actual_dir/ordena_fotos.py" "$1"
+}
+
  # 1. Arreglar el script si el audio dura menos que las imágenes porque genera valor negativo (el audio debe durar lo mismo que el video) ----->> NO. Esto se soluciona cambiando el totseconds. X
 # El slidier requiere ese ligero cambio sino te genera valores negativos. X
 # 2. Subir video automáticamente el audio a YouTube y a Archive. No se puede subir audios a youtube tendras que concatenarlos con una imágen. X
@@ -230,7 +241,7 @@ echo "Generando video..."
 # Música para que dure exactamente lo que dura el video (imagenes * 2 segundos):
 # la repito si es corta o la recorto si es larga.
 if [ $# -ge 4 ] && [ -f "$4" ]; then
-  cantidad_imgs=$(find "$3" -type f -iname '*.jpg' | wc -l)
+  cantidad_imgs=$(listar_fotos "$3" | wc -l)
   duracion_video=$((cantidad_imgs * 2))
   duracion_audio=$(ffprobe -v error -show_entries format=duration -of default=noprint_wrappers=1:nokey=1 "$4" 2>/dev/null | cut -d. -f1)
   if [ -n "$duracion_audio" ] && [ "$duracion_audio" -ne "$duracion_video" ]; then
@@ -252,7 +263,7 @@ audio_narrado=""
 if [ $# -eq 6 ] && [ -f "$4" ] && [ -f "/tmp/$tag_name.wav" ]; then
   echo "Mezclo la música con la narración..."
   # La mezcla dura lo que el video, o lo que la narración si es más larga.
-  n_imgs_mix=$(find "$3" -type f -iname '*.jpg' | wc -l)
+  n_imgs_mix=$(listar_fotos "$3" | wc -l)
   dur_vid_mix=$((n_imgs_mix * 2))
   dur_nar_mix=$(ffprobe -v error -show_entries format=duration -of default=nw=1:nk=1 "/tmp/$tag_name.wav" 2>/dev/null | cut -d. -f1)
   dur_nar_mix=${dur_nar_mix:-0}
@@ -269,14 +280,14 @@ if [ $# -eq 6 ] && [ -f "$4" ] && [ -f "/tmp/$tag_name.wav" ]; then
   fi
 fi
 
-(($# == 6)) && find "$3" -type f -iname '*.jpg' | sort | gen.sh > "/tmp/$tag_name" && cd /tmp && slider -i "$tag_name" -a "${audio_narrado:-$tag_name.wav}" -o "/tmp/$tag_name.mp4"
+(($# == 6)) && listar_fotos "$3" | gen.sh > "/tmp/$tag_name" && cd /tmp && slider -i "$tag_name" -a "${audio_narrado:-$tag_name.wav}" -o "/tmp/$tag_name.mp4"
 
 # Si es igual a 5 o 4 el video debería ser sin el audio-texto generado por espeak pero con el archivo de audio.
-(($# == 5)) && find "$3" -type f -iname '*.jpg' | sort | gen.sh > "/tmp/$tag_name" && cd /tmp && slider -i "$tag_name" -a "${audio_video:-$4}" -o "/tmp/$tag_name.mp4"
-(($# == 4)) && find "$3" -type f -iname '*.jpg' | sort | gen.sh > "/tmp/$tag_name" && cd /tmp && slider -i "$tag_name" -a "${audio_video:-$4}" -o "/tmp/$tag_name.mp4"
+(($# == 5)) && listar_fotos "$3" | gen.sh > "/tmp/$tag_name" && cd /tmp && slider -i "$tag_name" -a "${audio_video:-$4}" -o "/tmp/$tag_name.mp4"
+(($# == 4)) && listar_fotos "$3" | gen.sh > "/tmp/$tag_name" && cd /tmp && slider -i "$tag_name" -a "${audio_video:-$4}" -o "/tmp/$tag_name.mp4"
 
 # Si es igual a 3 el video debería ser solo imagenes sin audios.
-(($# == 3)) && find "$3" -type f -iname '*.jpg' | sort | gen.sh > "/tmp/$tag_name" && cd /tmp && slider -i "$tag_name" -o "/tmp/$tag_name.mp4"
+(($# == 3)) && listar_fotos "$3" | gen.sh > "/tmp/$tag_name" && cd /tmp && slider -i "$tag_name" -o "/tmp/$tag_name.mp4"
 
 echo "Listo."
 
@@ -327,15 +338,17 @@ if (($# > 2)); then
 fi
 
 echo "Subo imagenes a Archive"
-(($# > 2)) && cd "$3" && source $HOME/internetarchive/bin/activate && ia upload "$tag_name-images" *
+# -c: saltea los archivos que ya estan (por checksum), -n: no genera derivados,
+# -R/-s: reintenta si archive devuelve 503. Si se corta, reintenta en bucle.
+(($# > 2)) && cd "$3" && source $HOME/internetarchive/bin/activate && until ia upload "$item_fotos" -c -n -R 5 -s 5 *; do echo "La subida fallo, reintento en 30 segundos..."; sleep 30; done
 
 cd $actual_dir;
-cantidad_imagenes=$(find "$3" -type f -iname '*.jpg' | wc -l)
+cantidad_imagenes=$(listar_fotos "$3" | wc -l)
 
-(($# > 2)) && ((cantidad_imagenes >= 10)) && echo "<h3><a href=\"https://archive.org/details/$tag_name-images/\">¡¡¡VER LAS $cantidad_imagenes DE FOTOS EN ARCHIVE!!!!</a></h3>" >> "$actual_dir/posts/$tag_name.html" ; 
+(($# > 2)) && ((cantidad_imagenes >= 10)) && echo "<h3><a href=\"https://archive.org/details/$item_fotos/\">¡¡¡VER LAS $cantidad_imagenes DE FOTOS EN ARCHIVE!!!!</a></h3>" >> "$actual_dir/posts/$tag_name.html" ; 
 
 
-(($# > 2)) && cd "$3" && find . -type f -iname '*.jpg' -not -iname '*_thumb.jpg' | sort | while read -r i; do i="${i#./}"; echo "<a href=\"https://archive.org/download/$tag_name-images/$i\"><img src=\"https://archive.org/download/$tag_name-images/${i%.*}_thumb.jpg\"></a>" >> "$actual_dir/posts/$tag_name.html" ; done
+(($# > 2)) && cd "$3" && listar_fotos "$3" | while read -r i; do i="${i#$3/}"; echo "<a href=\"https://archive.org/download/$item_fotos/$i\"><img src=\"https://archive.org/download/$item_fotos/${i%.*}_thumb.jpg\"></a>" >> "$actual_dir/posts/$tag_name.html" ; done
 
 
 
