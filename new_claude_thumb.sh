@@ -1,6 +1,6 @@
+#!/bin/bash
 # Este archivo crea un video con un texto pero no sigue el texto en
 # coordinación con las imágenes.
-#!/bin/bash
 set -euo pipefail
 
 echo "se necesita el comando ia (internet archive)".
@@ -142,6 +142,17 @@ fi
 [ $# -ge 3 ] && [ ! -d "$3" ] && echo "Directorio de imágenes inválido" && exit 1
 [ $# -ge 4 ] && [ ! -f "$4" ] && echo "Audio no existe" && exit 1
 
+# YouTube acepta como máximo 100 caracteres de título.
+titulo_max=100
+if [ -z "${2:-}" ]; then
+  echo "El título no puede estar vacío."
+  exit 1
+fi
+if [ "${#2}" -gt "$titulo_max" ]; then
+  echo "Aviso: el título tiene ${#2} caracteres; YouTube permite máximo $titulo_max. Lo recorto."
+  set -- "$1" "$(printf '%s' "$2" | cut -c1-"$titulo_max")" "${@:3}"
+fi
+
 
 
 year=$(date +%Y)
@@ -182,7 +193,7 @@ listar_fotos() {
 # 9. Generar un archivo de audio con los subtitulos de chatgpt.
 # 10. Subir video automáticamente el video a YouTube y a Archive. X
 # source internetarchive/bin/activate && ia upload $year-$month-$day-$1 /tmp/video_generado.mp4 X
-# source $HOME/youtube-upload/bin/activate && $HOME/youtube-upload/youtube-upload/bin/youtube-upload --title="$1" --default-language="es" --privacy="unlisted" --embeddable=True /tmp/video_generado.mp4 X
+# source "$HOME/youtube-upload/bin/activate" && $HOME/youtube-upload/youtube-upload/bin/youtube-upload --title="$1" --default-language="es" --privacy="unlisted" --embeddable=True /tmp/video_generado.mp4 X
 #### Video subido a  Archive.org:
 # <video width="640" height="480" controls>
 #   <source src="path/to/video.mp4" type="video/mp4">
@@ -304,20 +315,20 @@ fi
 
 ((prueba == 1)) && echo "Modo prueba. No subire el video." && exit;
 
-cd $actual_dir;
+cd "$actual_dir";
 
-(($# > 2)) && echo "Subimos video a YouTube" && source $HOME/youtube-upload/bin/activate && youtube_id=$($HOME/youtube-upload/youtube-upload/bin/youtube-upload --title="$2" --privacy="unlisted" --embeddable=True "/tmp/$tag_name.mp4" | tail -1) && echo "Cargo video de YouTube en el html generado (iframe tag)." && echo "<h3><a href=\"https://www.youtube.com/embed/$youtube_id\">¡¡CLICK PARA VER VIDEO DE LAS FOTOS EN YOUTUBE (con explicación)!!</a></h3>" >> "posts/$tag_name.html"
+(($# > 2)) && echo "Subimos video a YouTube" && source "$HOME/youtube-upload/bin/activate" && youtube_id=$($HOME/youtube-upload/youtube-upload/bin/youtube-upload --title="$2" --privacy="unlisted" --embeddable=True "/tmp/$tag_name.mp4" | tail -1) && echo "Cargo video de YouTube en el html generado (iframe tag)." && echo "<h3><a href=\"https://www.youtube.com/embed/$youtube_id\">¡¡CLICK PARA VER VIDEO DE LAS FOTOS EN YOUTUBE (con explicación)!!</a></h3>" >> "posts/$tag_name.html"
 
-(($# > 2)) && echo "Subimos video a Archive.org" && source $HOME/internetarchive/bin/activate && ia upload "$tag_name-video" "/tmp/$tag_name.mp4" && echo "Cargo video de Archive en el html generado (video tag)." && echo "<h3><a href=\"https://archive.org/download/$tag_name-video/$tag_name.mp4\">¡¡CLICK PARA VER VIDEO DE LAS FOTOS EN ARCHIVE (con explicación)!!</a></h3>" >> "posts/$tag_name.html"; 
+(($# > 2)) && echo "Subimos video a Archive.org" && source "$HOME/internetarchive/bin/activate" && ia upload "$tag_name-video" "/tmp/$tag_name.mp4" && echo "Cargo video de Archive en el html generado (video tag)." && echo "<h3><a href=\"https://archive.org/download/$tag_name-video/$tag_name.mp4\">¡¡CLICK PARA VER VIDEO DE LAS FOTOS EN ARCHIVE (con explicación)!!</a></h3>" >> "posts/$tag_name.html"; 
 
 
 # Si pusiste el 5to argumento como 1 entonces subimos el pseudoaudio
-(($# > 4)) && (($5 == 1)) && echo "Subimos el audio a Archive." && source $HOME/internetarchive/bin/activate && ia upload "$year-$month-$day-$1audio" "$4" && echo "<h3><a href=\"https://archive.org/download/$year-$month-$day-$1audio/$4\">¡¡¡Escuchar el Audio del suceso!!!.</a></h3>" >> "posts/$tag_name.html" ; 
+(($# > 4)) && (($5 == 1)) && echo "Subimos el audio a Archive." && source "$HOME/internetarchive/bin/activate" && ia upload "$year-$month-$day-$1audio" "$4" && echo "<h3><a href=\"https://archive.org/download/$year-$month-$day-$1audio/$4\">¡¡¡Escuchar el Audio del suceso!!!.</a></h3>" >> "posts/$tag_name.html" ; 
 
 
 echo "OJO: No se puede subir audio a YouTube lo concatenaré con una imagen."
 
-(($# > 4)) && (($5 == 1)) && echo "Subimos el audio a YouTube." && echo "Generamos thumbnail para youtube" && (cd /tmp && thumbnailg "$2" "/tmp/$tag_name.png") && echo "Creando un video a partir del audio..." && ffmpeg -i "/tmp/$tag_name.png" -i "$4" -c:v libx264 -tune stillimage -c:a copy /tmp/$tag_name.mp4 && source $HOME/youtube-upload/bin/activate && youtube_id=$($HOME/youtube-upload/youtube-upload/bin/youtube-upload --title="$2" --privacy="unlisted" --embeddable=True "/tmp/$tag_name.mp4" | tail -1) && echo "Cargo video del audio de YOUTUBE en el html generado (a tag)." && echo "<h3><a href=\"https://www.youtube.com/embed/$youtube_id\">¡¡CLICK PARA ESCUCHAR EL AUDIO EN YOUTUBE!!</a></h3>" >> "posts/$tag_name.html"
+(($# > 4)) && (($5 == 1)) && echo "Subimos el audio a YouTube." && echo "Generamos thumbnail para youtube" && (cd /tmp && thumbnailg "$2" "/tmp/$tag_name.png") && echo "Creando un video a partir del audio..." && ffmpeg -i "/tmp/$tag_name.png" -i "$4" -c:v libx264 -tune stillimage -c:a copy /tmp/$tag_name.mp4 && source "$HOME/youtube-upload/bin/activate" && youtube_id=$($HOME/youtube-upload/youtube-upload/bin/youtube-upload --title="$2" --privacy="unlisted" --embeddable=True "/tmp/$tag_name.mp4" | tail -1) && echo "Cargo video del audio de YOUTUBE en el html generado (a tag)." && echo "<h3><a href=\"https://www.youtube.com/embed/$youtube_id\">¡¡CLICK PARA ESCUCHAR EL AUDIO EN YOUTUBE!!</a></h3>" >> "posts/$tag_name.html"
 
 
 echo "Cargo imagenes de archive en el html generado."
@@ -329,7 +340,7 @@ echo "Genero thumbnails de las imágenes..."
 if (($# > 2)); then
   (
     cd "$3"
-    find . -type f -iname '*.jpg' -not -iname '*_thumb.jpg' | sort | while read -r img; do
+    find . -type f -iname '*.jpg' -not -iname '*_thumb.jpg' -print0 | sort -z | while IFS= read -r -d '' img; do
       thumb="${img%.*}_thumb.jpg"
       [ -f "$thumb" ] && continue  # ya existe, no lo piso
       magick "$img" -resize "${thumb_ancho}x${thumb_ancho}" -quality 85 "$thumb"
@@ -340,9 +351,20 @@ fi
 echo "Subo imagenes a Archive"
 # -c: saltea los archivos que ya estan (por checksum), -n: no genera derivados,
 # -R/-s: reintenta si archive devuelve 503. Si se corta, reintenta en bucle.
-(($# > 2)) && cd "$3" && source $HOME/internetarchive/bin/activate && until ia upload "$item_fotos" -c -n -R 5 -s 5 *; do echo "La subida fallo, reintento en 30 segundos..."; sleep 30; done
+# Subo SOLO las fotos (.jpg y sus _thumb.jpg), no los audios .m4a de la carpeta.
+if (($# > 2)); then
+  cd "$3"
+  source "$HOME/internetarchive/bin/activate"
+  mapfile -t fotos_upload < <(find . -type f -iname '*.jpg' | sed 's|^\./||' | sort)
+  if [ "${#fotos_upload[@]}" -gt 0 ]; then
+    until ia upload "$item_fotos" -c -n -R 5 -s 5 --keep-directories "${fotos_upload[@]}"; do
+      echo "La subida fallo, reintento en 30 segundos..."
+      sleep 30
+    done
+  fi
+fi
 
-cd $actual_dir;
+cd "$actual_dir";
 cantidad_imagenes=$(listar_fotos "$3" | wc -l)
 
 (($# > 2)) && ((cantidad_imagenes >= 10)) && echo "<h3><a href=\"https://archive.org/details/$item_fotos/\">¡¡¡VER LAS $cantidad_imagenes DE FOTOS EN ARCHIVE!!!!</a></h3>" >> "$actual_dir/posts/$tag_name.html" ; 
@@ -352,7 +374,7 @@ cantidad_imagenes=$(listar_fotos "$3" | wc -l)
 
 
 
-cd $actual_dir;
+cd "$actual_dir";
 
 echo "<hr>" >> "posts/$tag_name.html"
 echo "<h3>Resumen</h3>" >> "posts/$tag_name.html"
